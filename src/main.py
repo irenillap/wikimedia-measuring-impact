@@ -166,12 +166,12 @@ def pipeline():
 if __name__ == '__main__':
     images = images_owned_by()
     
-    image_usage = {}
-    for image in images:
-        image_usage[image] = image_usage_query(image)
+    # image_usage = {}
+    # for image in images:
+    #     image_usage[image] = image_usage_query(image)
 
-    # import json
-    # image_usage = json.load(open('image_usage.json','r'))
+    import json
+    image_usage = json.load(open('image_usage.json','r'))
 
     images = []
     pages = []
@@ -204,6 +204,7 @@ if __name__ == '__main__':
 
     image_usage_agg = image_usage_df.groupby('image').sum()
 
-
+    import pdb
+    pdb.set_trace()
 
 
