@@ -1,0 +1,76 @@
+{"0": 
+	{"title": "File:A deserted church repaired in 1626 (1205512).jpg",
+	 "pages": ["Parish Church", "Church of England"],
+	  "suggs": ["The Church of Jesus Christ of Latter-day Saints", "Desert Fathers", "Deserted medieval village"],
+	  "acc_suggs": ["Desert Fathers"]},
+ "1": 
+	{"title": "File:View of Wyke Church & West part of Portland, after Princess Sophia of Gloucester.jpg",
+	 "pages": ["All Saints Church, Wyke Regis", "Wyke Regis"],
+	 "suggs": ["All Saints Church, Wyke Regis", "Wyke", "Wyke Regis", "Wyke Regis Methodist Church"],
+	 "acc_suggs": ["All Saints Church, Wyke Regis", "Wyke Regis"]},
+ "2": 
+	{"title": "File:Amunition Tower at Cardiff Castle (1205512).jpg",
+	 "pages": ["Cardiff", "Cardiff Castle", "Norman invasion of Wales"],
+	 "suggs": ["Cardiff", "Castle Coch", "Cardiff Castle", "William Burges"],
+	 "acc_suggs": ["Cardiff", "Cardiff Castle", "William Burges"]},
+ "3": 
+	{"title": "File:An inner part of Caerphilly Castle (1205512).jpg",
+	 "pages": ["Caerphilly Castle", "Gilbert de Clare", "Castles in Great Britain and Ireland"],
+	 "suggs": ["Caerphilly", "Caerphilly Castle", "Llywelyn Bren", "Hoarding (castle)", "Eleanor de Clare"],
+	 "acc_suggs": ["Caerphilly", "Caerphilly Castle", "Llywelyn Bren", "Eleanor de Clare"]},
+ "4": 
+	{"title": "File:Llandough Castle from the North (1205512).jpg",
+	 "pages": ["Llandough", "Llandough Castle", "Cowbridge"],
+	"suggs": ["Barry, Vale of Glamorgan", "Vale of Glamorgan", "Llandough"],
+	 "acc_suggs": ["Llandough", "Vale of Glamorgan"]},
+ "5": 
+	{"title": "File:Part of Chepstow Bridge down River (1205512).jpg",
+	 "pages": ["Chepstow"],
+	 "suggs": ["Severn Bridge", "Chepstow", "Chepstow Castle", "Old Wye Bridge, Chepstow"],
+	 "acc_suggs": ["Chepstow", "Old Wye Bridge, Chepstow"]},
+ "6": 
+	{"title": "File:Penllyn Castle from the East (1205512).jpg",
+	 "pages": ["Penllyn Castle", "Cowbridge",  "Robert Fitzhamon"],
+	 "suggs": ["Caernarfon Castle", "Penllyn Castle", "Penllyn, Vale of Glamorgan"],
+	 "acc_suggs": ["Penllyn Castle", "Penllyn, Vale of Glamorgan"]},
+ "7": 
+	{"title": "File:Pontypridd Bridge, 172 feet over the Taf (1205512).jpg",
+	 "pages": ["Old Bridge, Pontypridd", "Pontypridd"],
+	 "suggs": ["Pontypridd", "Old Bridge, Pontypridd", "River Taff"],
+	 "acc_suggs": ["Pontypridd", "Old Bridge, Pontypridd", "River Taff"]},
+ "8": 
+	{"title": "File:St Donat's Castle from Wes (1205512).jpg",
+	 "pages": ["St Donat's Castle", "St Donats", "Caratacus"],
+	 "suggs": ["St Donat's Castle", "St Donats", "Welsh St Donats", "Stradling baronet"],
+	 "acc_suggs": ["St Donat's Castle", "St Donats", "Stradling baronet"]},
+ "9": 
+	{"title": "File:St. Quentin's Castle, Llanblethian from the South (1205512).jpg",
+	 "pages": ["St Quintins Castle", "Llanblethian"],
+	 "suggs": ["Elephant and Castle", "List of motte-and-bailey castles", "St Quintins Castle"],
+	 "acc_suggs": ["List of motte-and-bailey castles", "St Quintins Castle"]},
+ "10":
+    {"title": "File:Monmouth Castle over the Wye at Monmouth.jpeg",
+     "pages": ["Monmouth Castle"],
+	 "suggs": ["Monmouth Castle", "Henry V of England", "Monmouth", "Monmouth Regimental Museum"],
+	 "acc_suggs": ["Henry V of England", "Monmouth", "Mounmouth Castle"]},
+ "11":
+ 	{"title": "File:Cader Idris.jpeg",
+ 	 "pages": ["Cadair Idris", "List of lakes of Wales", "Snowdonia National Park", "Idris Gawr"],
+	 "suggs": ["Snowdonia", "Giants (Welsh folklore)", "Dolgellau"],
+	 "acc_suggs": ["Snowdonia", "Giants (Welsh folklore)", "Dolgellau"]},
+ "12":
+ 	{"title": "File:Devils Bridge, Upper View, Cardiganshire.jpeg",
+ 	 "pages": ["Devil's Bridge, Ceredigion", "Hafod Uchtryd",  "Afon Mynach", "Vale of Rheidol Railway"],
+	 "suggs": ["Devil's Bridge", "Kirkby Lonsdale", "Devil's Bridge, Ceredigion"],
+	 "acc_suggs": ["Devil's Bridge", "Kirkby Lonsdale", "Devil's Bridge, Ceredigion"]},
+ "13":
+ 	{"title": "File:Neath Abbey (1129242).jpg",
+ 	 "pages": ["Neath Abbey", "Cistercians", "Richard de Grenville", "Neath", "River Neath"],
+	 "suggs": ["Richard de Grenville", "Neath Abbey", "Neath Abbey television relay station", "Skewen"],
+	 "acc_suggs": ["Richard de Grenville", "Neath Abbey", "Skewen"]},
+ "14":
+ 	{"title": "File:Chepstow Castle (1129437).jpg",
+ 	 "pages": ["Chepstow Castle", "Striguil", "Norman invasion of Wales", "Kingdom of Gwent", "Nicholas Kemeys"],
+	 "suggs": ["Chepstow Castle", "Castle-class corvette", "Pembroke Castle", "Monmouthshire", "Chepstow"],
+	 "acc_suggs": ["Chepstow Castle", "Chepstow", "Monmouthshire"]}
+}
