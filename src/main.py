@@ -71,6 +71,7 @@ if __name__ == '__main__':
         image_corpus[image] = mwapi_queries.entry_text_query(pages=search_results)
         if len(search_results) > 0:
             tf_idf = nlp.tf_idf(page_summaries=image_corpus[image],
+                                training_summaries=summaries,
                                 final_words=final_words,
                                 image=image)
 
