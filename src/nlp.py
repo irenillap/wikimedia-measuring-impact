@@ -6,6 +6,18 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 def create_image_main_words(image_title, nlp_filter=None):
+	"""
+	Function to extract key words from the relevant image title. To do this, remove all digits,
+	punctuation and stopwords from image title. Also uses an nlp filter if there is one to place
+	more emphasis on words relevant to image collection (eg 'castle' for landscape images)
+
+	Inputs:
+	* image_title - string of image title as appears on Wikimedia
+	* nlp_filter - string to call on manually created nlp filter if needed
+
+	Outputs:
+	* final_words - set of final relevant words extracted from title
+	"""
     image_title_words = []
     remove_digits = str.maketrans('', '', string.digits)
     remove_punctuation = str.maketrans('','',string.punctuation)
@@ -31,6 +43,16 @@ def create_image_main_words(image_title, nlp_filter=None):
     return final_words
 
 def preprocess_summaries(page_summaries):
+	"""
+	Function to create full corpus of words from candidate pages summaries
+
+	Inputs:
+	* page_summaries - dictionary of image being studied and summary text of all 
+	candidate Wikipedia entries
+
+	Outputs:
+	* all_summaries - list of all words in all relevant summaries
+	"""
 	all_summaries = []
 
 	for image, summary in page_summaries.items():
@@ -49,6 +71,19 @@ def preprocess_summaries(page_summaries):
 
 
 def tf_idf(page_summaries, training_summaries, final_words, image):
+	"""
+	Function to calculate tf-idf score defining word relevance for image and candidate Wikipedia entry
+
+	Inputs:
+	* page_summaries - dictionary of image being studied and summary text of all 
+	candidate Wikipedia entries
+	* training_summaries - dictionary of all benchmark summaries
+	* final_words - set of relevant words extracted from image
+	* image - string of image title as appears on Wikimedia
+
+	Outputs:
+	* relevant_df - pd DataFrame of numerical relevance of relevant words
+	"""
 	all_summaries = []
 	all_pages = []
 	pages = []
@@ -82,14 +117,6 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 	print("RESULTS FOR IMAGE {}:".format(image))
 	print("Relevant words are {}".format(relevant_words))
 	ordered_pages = []
-	# for i, page in enumerate(all_pages):
-	# 	import pdb
-	# 	pdb.set_trace()
-	# 	relevance = relevant_df['word_relevance'].iloc[ordered_indexes[i]]
-	# 	if relevance > 0:
-	# 		print("Page {} has a relevance of {}".format(all_pages[ordered_indexes[i]],relevance))
-	# 	ordered_pages.append(all_pages[ordered_indexes[i]])
-	# 	print("Appended page", all_pages[ordered_indexes[i]], "in order", i, "with relevance", relevance)
 
 	relevant_df.loc[:, 'entry'] = all_pages
 
@@ -103,6 +130,18 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 
 
 def apply_nlp_filter(words, nlp_filter):
+	"""
+	Function to apply nlp filter if required. Applying the filter creates compound relevant words 
+	e.g. if 'Harlem Castle from East' is title, normal words would pick up ['Harlem', 'Castle', 'East']. This 
+	function will also append ['Harlem Castle'] to the list.
+
+	Inputs:
+	* words - set of relevant words extracted from an image title 
+	* nlp_filter - string of applied nlp filter
+
+	Outputs:
+	* new_words - updated set of relevant words for image title
+	"""
 	if nlp_filter == 'landscape':
 		keywords = ['castle', 'river', 'abbey', 'hill', 'shire', 'baths', 'bridge', 'church', 'waterfall','mountain', 'vale']
 
