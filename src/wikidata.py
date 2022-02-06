@@ -2,6 +2,16 @@ import requests
 import numpy as np
 
 def images_owned_by():
+    """
+    Function to return all images on Wikimedia tagged as owned by a certain institution
+    (currently all hardcoded)
+    POSSIBLE TODO: change to not being hardcoded
+
+    Input:
+
+    Output:
+    * images: dictionary
+    """
     url = 'https://query.wikidata.org/sparql'
 
     query = """
@@ -29,6 +39,16 @@ def images_owned_by():
 
 
 def images_in_collection():
+    """
+    Function to return 200 images on Wikimedia tagged as belonging to a certain collection
+    (currently all hardcoded)
+    POSSIBLE TODO: change to collection and limit not being hardcoded
+
+    Input:
+
+    Output:
+    * images: dictionary
+    """
     url = 'https://query.wikidata.org/sparql'
 
     query = """
@@ -56,6 +76,16 @@ def images_in_collection():
 
 
 def process_pilot_collection():
+    """
+    Function to return and process 200 images on Wikimedia tagged as belonging to the NLW landscape collection
+    (currently all hardcoded)
+    POSSIBLE TODO: change to collection and limit not being hardcoded
+
+    Input:
+
+    Output:
+    * images: dictionary
+    """
     url = 'https://query.wikidata.org/sparql'
 
     query = """
@@ -82,18 +112,3 @@ def process_pilot_collection():
     return images
 
 
-def collections_owned_by():
-    url = 'https://query.wikidata.org/sparql'
-
-    query = """
-    SELECT DISTINCT ?collectionLabel
-    WHERE {
-        ?collection wdt:P127 wd:Q666063.
-      SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE]". }
-      }
-    """
-
-    r = requests.get(url, params={'format': 'json',
-                                  'query': query})
-
-    data = r.json()
