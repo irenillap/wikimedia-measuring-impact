@@ -8,6 +8,15 @@ import wikipedia
 import pandas as pd
 
 def image_usage_query(image):
+    """
+    Function to retrieve Wikipedia entries where image is being used
+
+    Input:
+    * image: string of image title as appearing on Wikimedia
+
+    Output:
+    * image_usage: list of relevant Wikipedia entry titles
+    """
     session = mwapi.Session(host='https://en.wikipedia.org/',
                             user_agent='measuring_impact/0.0 (irene.iriarte.c@gmail.com)')
 
@@ -34,6 +43,16 @@ def image_usage_query(image):
 
 
 def page_views_query(page):
+    """
+    Function to return average monthly views on page since Jan 2020
+    TODO: make this a more dynamic window, possibly determined by specified timeframe inputted by user
+
+    Input:
+    * page: Wikipedia page title
+
+    Output:
+    * float of monthly average views of page
+    """
     p = PageviewsClient(user_agent="measuring_impact/0.0 (irene.iriarte.c@gmail.com)")
 
 
@@ -58,6 +77,15 @@ def page_views_query(page):
 
 
 def page_completeness(page):
+    """
+    Function to return the number of words in a Wikipedia page
+
+    Input:
+    * page: Wikipedia page title
+
+    Output:
+    * int of (approx.) number of words
+    """
     try:
         page_info = wikipedia.page(page)
 
@@ -67,52 +95,18 @@ def page_completeness(page):
         return None 
 
 
-def word_search_query(words, image_title, relevance_limit=50):
-    session = mwapi.Session(host='https://en.wikipedia.org/',
-                            user_agent='measuring_impact/0.0 (irene.iriarte.c@gmail.com)')
-
-    image_word_search_results = []
-
-    for word in words:
-        continued = session.get(
-            formatversion=2,
-            action='query',
-            generator='search',
-            gsrsearch=word,
-            gsrlimit=relevance_limit + 1,
-            continuation=True)
-
-        for portion in continued:
-            if 'query' in portion:
-                word_results = len(portion['query']['pages'])
-                if word_results > relevance_limit:
-                    print("Word {} has over {} results, so will be discounted".format(word, word_results))
-                    break
-                else:
-                    print("Word {} has {} results, so will be used for relevancy".format(word, word_results))
-                    for page in portion['query']['pages']:
-                        image_word_search_results.append(page['title'])
-
-    if len(image_word_search_results) == 0:
-        compound_words = [word for word in words if len(word.split(' ')) > 1]
-
-        try:
-            if len(compound_words) > 0:
-                image_word_search_results = wikipedia.search(compound_words[0], results=10)
-                print("There are compound words, searching for {}".format(compound_words[0]))
-            else:
-                if image_title[-4:] == 'jpeg':
-                    image_word_search_results = wikipedia.search(image_title[5:-5],results=10)
-                    print("There are no compound words, searching for {}".format(image_title[5:-5]))
-                else:
-                    image_word_search_results = wikipedia.search(image_title[5:-4],results=10)
-                    print("There are no compound words, searching for {}".format(image_title[5:-4]))
-        except:
-            image_word_search_results = []
-
-    return image_word_search_results
-
 def word_search_query_compound(words, image_title):
+    """
+    Function to return potential Wikipedia entry candidates for a certain image. If compound words (eg 'Harlem castle') 
+    exist in set of relevant words, this will be the main search. Otherwise, the whole title will be searched for instead.
+
+    Input:
+    * words - set of relevant words extracted from image title
+    * image_title - string of image title as appears on Wikimedia
+
+    Output:
+    * image_word_search_results - list of candidate Wikipedia entries returning from searching for relevant words
+    """
     image_word_search_results = []
 
     compound_words = [word for word in words if len(word.split(' ')) > 1]
@@ -135,6 +129,15 @@ def word_search_query_compound(words, image_title):
 
 
 def entry_text_query(pages):
+    """
+    Function to retrieve summaries for all possible pages
+
+    Inputs:
+    * pages - list of all considered Wikipedia entries titles
+
+    Outputs:
+    * page_corpus - dictionary with all pages as keys and their summaries as values
+    """
     page_corpus = {}
     for page in pages:
         try:
@@ -147,26 +150,35 @@ def entry_text_query(pages):
 
 
 def image_uniqueness(page, main_image, relevant_words):
+    """
+    Function to calculate the image uniqueness component of the impact metric. This is calculated by 
+    finding the overlap of relevant words that are present in the relevant image title and the image titles
+    of other images in the Wikipedia entry. Also checks whether image is already in Wikipedia entry.
+
+    Inputs:
+    * page - string of Wikipedia entry title
+    * main_image - string of title of image in collection
+    * relevant_words - set of relevant words extracted from title
+
+    Outputs:
+    * float of image uniqueness value for Wikipedia entry and image combination
+    """
     try:
         page_info = wikipedia.page(page)
         images = page_info.images
         total_overlap = []
-        # print(main_image)
+
         for image in images:
             image = image.split('/')[-1].lower()
-            # print(image)
             if image == main_image[5:]:
                 return 'Image in entry'
             image_overlap = []
             for word in relevant_words:
-                # import pdb
-                # pdb.set_trace()
                 if word in image:
                     image_overlap.append(1)
                 else:
                     image_overlap.append(0)
             
-            # print(sum(image_overlap)/float(len(relevant_words)))
             total_overlap.append(sum(image_overlap)/float(len(relevant_words)))
 
         final_value = sum([1 for overlap in total_overlap if overlap >= 0.5])
@@ -180,6 +192,16 @@ def image_uniqueness(page, main_image, relevant_words):
 
 
 def process_benchmark_data(benchmark_data):
+    """
+    Function to process benchmark data including calculating percentiles for page views and page completeness
+
+    Inputs:
+    * benchmark_data - dictionary of benchmark data
+
+    Outputs:
+    * benchmark_df - pd DataFrame of benchmark data titles with their page views and page completeness percentiles 
+    * summaries - dictionary of each entry and its summary
+    """
     entries = []
     pageviews = []
     pagecompleteness = []
