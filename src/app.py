@@ -34,19 +34,9 @@ weight4 = st.sidebar.slider(
 	0.00,1.00,0.01
 )
 
-# eq_weighting = st.sidebar.button('Click here for equal weighting')
-# if eq_weighting:
-# 	weight1 = 0.25
-# 	weight2 = 0.25
-# 	weight3 = 0.25
-# 	weight4 = 0.25
-
 
 confirmation_button = st.sidebar.button('Confirm weights and rerun')
 
-# suggested_results = pd.read_csv('final_results_25072021.csv')
-# suggested_results = pd.read_csv('results_final_pilot_coll_compound_250721.csv')
-# suggested_results = pd.read_csv('final_results_11082021.csv')
 suggested_results = pd.read_csv('final_results.csv')
 
 if confirmation_button:
