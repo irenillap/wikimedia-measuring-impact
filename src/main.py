@@ -7,6 +7,37 @@ import numpy as np
 
 import datetime
 
+def benchmark_values(benchmark_data, final_results):
+    """
+    Function to benchmark relevant Wikipedia entry values into percentiles based on benchmark data
+
+    Inputs:
+    * benchmark_data - dictionary of benchmark images with their page views and page completeness
+    * final_results - pd DataFrame of current results of images and candidate Wikipedia entries
+
+    Outputs:
+    * pageviewsperc - list of percentile of pageviews for each Wikipedia entry
+    * pagecompletenessperc - list of percentile of page completeness for each Wikipedia entry
+    """
+    pageviewsperc = []
+    pagecompletenessperc = []
+
+    for row in final_results.iterrows():
+        if row[1]['page_views'] < np.max(benchmark_data.pageviews.values):
+            index = np.where(np.sort(benchmark_data_df.pageviews.values) > row[1]['page_views'])[0][0]
+            perc = np.sort(benchmark_data.page_views_percentile.values)[index]
+            pageviewsperc.append(perc)
+        else:
+            pageviewsperc.append(100)
+
+        if row[1]['page_completeness'] < np.max(benchmark_data.pagecompleteness.values):
+            index = np.where(np.sort(benchmark_data_df.pagecompleteness.values) > row[1]['page_completeness'])[0][0]
+            perc = np.sort(benchmark_data.page_completeness_percentile.values)[index]
+            pagecompletenessperc.append(perc)
+        else:
+            pagecompletenessperc.append(100)
+
+    return pageviewsperc, pagecompletenessperc
 
 if __name__ == '__main__':
     """
@@ -14,6 +45,10 @@ if __name__ == '__main__':
     """
     # Collect images in a (hardcoded for now) collection
     images = wikidata.images_in_collection()
+
+    # Open benchmark data to calculate accurate benchmarks for page views and page completeness
+    benchmark_data = json.load(open('benchmark_data.json','r'))
+    benchmark_data_df, summaries = mwapi_queries.process_benchmark_data(benchmark_data=benchmark_data)
 
     # Find where these images are currently being used
     image_usage = {}
@@ -31,8 +66,8 @@ if __name__ == '__main__':
         print("Processing image {}, {} out of {}".format(image, i+1, len(images)))
         final_words = nlp.create_image_main_words(image_title=image,
                                                   nlp_filter='landscape')
-        search_results = mwapi_queries.word_search_query(words=final_words,
-                                                         image_title=image)
+        search_results = mwapi_queries.word_search_query_compound(words=final_words,
+                                                                  image_title=image)
         image_corpus[image] = mwapi_queries.entry_text_query(pages=search_results)
         if len(search_results) > 0:
             tf_idf = nlp.tf_idf(page_summaries=image_corpus[image],
@@ -54,9 +89,12 @@ if __name__ == '__main__':
             tf_idf = None
         final_results = final_results.append(tf_idf)
 
-    # Change absolute values of page views and page completeness to relative percentiles
-    final_results['page_views_percentile'] = pd.qcut(final_results['page_views'].values, 100, labels=False, duplicates='drop')
-    final_results['page_completeness_percentile'] = pd.qcut(final_results['page_completeness'].values, 100, labels=False, duplicates='drop')
+    # Change absolute values of page views and page completeness to relative percentiles based on benchmark data
+    pageviewsperc, pagecompletenessperc = benchmark_values(benchmark_data=benchmark_data_df, 
+                                                           final_results=final_results)
+
+    final_results['page_views_percentile'] = pageviewsperc
+    final_results['page_completeness_percentile'] = pagecompletenessperc
 
     # Combine all components into one final score
     final_results['final_score'] = 0.25*final_results['word_relevance'] \
