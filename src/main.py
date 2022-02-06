@@ -8,61 +8,14 @@ import numpy as np
 import datetime
 
 
-def pipeline():
-    images = wikidata.images_owned_by()
-    
-    # image_usage = {}
-    # for image in images:
-    #     image_usage[image] = mwapi_queries.image_usage_query(image)
-
-    import json
-    image_usage = json.load(open('image_usage.json','r'))
-
-    create_collection_main_words(images=images)
-
-    images = []
-    pages = []
-    for image, page in image_usage.items():
-        images.append(image)
-        pages.append(page)
-
-    image_usage_df = pd.DataFrame()
-    image_usage_df['image'] = images
-    image_usage_df['pages'] = pages
-    image_usage_df = image_usage_df.explode('pages')
-
-    page_views = {}
-    for image, pages in image_usage.items():
-        if pages != ['Image not used']:
-            page_views[image] =  mwapi_queries.page_views_query(pages)
-
-    page_view_keys = [k  for  k in  page_views.keys()]
-    dates = [k for k in page_views[page_view_keys[0]].keys()]
-
-    dates_data = {}
-    for date in np.sort(dates):
-        dates_data[date] = []
-        for entry in image_usage_df.iterrows():
-            if entry[1][1] != 'Image not used':
-                dates_data[date].append(page_views[entry[1][0]][date][entry[1][1].replace(' ','_')])
-            else:
-                dates_data[date].append(None)
-        image_usage_df[date] = dates_data[date]
-
-    image_usage_agg = image_usage_df.groupby('image').sum()
-
-    import pdb
-    pdb.set_trace()
-    return image_usage_df
-
-
 if __name__ == '__main__':
+    """
+    Main pipeline used to collect, analyse images and create results of impact measure 
+    """
+    # Collect images in a (hardcoded for now) collection
     images = wikidata.images_in_collection()
-    import pdb
-    pdb.set_trace()
-    # import json
-    # image_usage = json.load(open('image_usage.json','r'))
 
+    # Find where these images are currently being used
     image_usage = {}
     for image in images:
         image_usage[image] = mwapi_queries.image_usage_query(image)
@@ -70,6 +23,9 @@ if __name__ == '__main__':
     image_corpus = {}
     final_results = pd.DataFrame()
 
+    # Iterate through all images in collection and find some suitable Wikipedia entries.
+    # For each image-Wikipedia entry combination, calculate page views, page completeness,
+    # title relevance and image uniqueness measures
     for i, image in enumerate(images):
         print("***********************************************")
         print("Processing image {}, {} out of {}".format(image, i+1, len(images)))
@@ -98,9 +54,11 @@ if __name__ == '__main__':
             tf_idf = None
         final_results = final_results.append(tf_idf)
 
+    # Change absolute values of page views and page completeness to relative percentiles
     final_results['page_views_percentile'] = pd.qcut(final_results['page_views'].values, 100, labels=False, duplicates='drop')
     final_results['page_completeness_percentile'] = pd.qcut(final_results['page_completeness'].values, 100, labels=False, duplicates='drop')
 
+    # Combine all components into one final score
     final_results['final_score'] = 0.25*final_results['word_relevance'] \
                                  + 0.25*final_results['page_views_percentile']*0.01 \
                                  + 0.25*final_results['page_completeness_percentile']*0.01 \
@@ -108,6 +66,7 @@ if __name__ == '__main__':
     final_results.final_score = final_results.final_score.round(2)
     final_results = final_results.reset_index(drop=True)
 
+    # Save results to csv
     final_results.to_csv('final_results.csv',index=False)
 
 
