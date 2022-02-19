@@ -1,0 +1,69 @@
+image,entry,word_relevance,relevant_words,page_views,page_completeness,image_uniqueness,page_views_percentile,page_completeness_percentile,final_score
+File:The Great Hall at Conway Castle.jpeg,Earl of Conway,0.8475568787974901,"['hall', 'great', 'conway', 'castle']",233,285,1.0,61,52,0.74
+File:The Great Hall at Conway Castle.jpeg,Castle Conway,0.8398585846609259,"['hall', 'great', 'conway', 'castle']",215,323,1.0,60,55,0.75
+File:The Great Hall at Conway Castle.jpeg,HMS Conway Castle,0.7752908846014661,"['hall', 'great', 'conway', 'castle']",27,65,1.0,3,18,0.5
+File:The Great Hall at Conway Castle.jpeg,Allington Castle,0.3019181156081879,"['hall', 'great', 'conway', 'castle']",1638,2131,1.0,90,88,0.77
+File:The Great Hall at Conway Castle.jpeg,Blarney Castle,0.257778440817597,"['hall', 'great', 'conway', 'castle']",4897,488,1.0,95,66,0.72
+File:The Great Hall at Conway Castle.jpeg,Rhys ap Tudur,0.1692467264360167,"['hall', 'great', 'conway', 'castle']",376,760,1.0,72,75,0.66
+File:The Great Hall at Conway Castle.jpeg,Lismore Castle,0.12951520541083686,"['hall', 'great', 'conway', 'castle']",6116,1104,1.0,96,81,0.72
+File:The Great Hall at Conway Castle.jpeg,Conwy,0.09162789173502991,"['hall', 'great', 'conway', 'castle']",4604,1072,1.0,95,81,0.71
+"File:Harleigh i.e. Harlech Castle, Merionethshire.jpeg",Harlech Castle,0.692325083270683,"['harlech', 'merionethshire', 'castle']",7527,2103,1.0,97,88,0.89
+"File:Harleigh i.e. Harlech Castle, Merionethshire.jpeg",Men of Harlech,0.6823140058973487,"['harlech', 'merionethshire', 'castle']",7539,881,1.0,97,78,0.86
+"File:Harleigh i.e. Harlech Castle, Merionethshire.jpeg",Caernarfon Castle,0.5623078480246491,"['harlech', 'merionethshire', 'castle']",11893,3319,1.0,98,91,0.86
+"File:Harleigh i.e. Harlech Castle, Merionethshire.jpeg",Harlech,0.435498266155157,"['harlech', 'merionethshire', 'castle']",2177,963,1.0,92,79,0.79
+"File:Harleigh i.e. Harlech Castle, Merionethshire.jpeg",Beaumaris Castle,0.4284482403138668,"['harlech', 'merionethshire', 'castle']",7015,2637,1.0,96,89,0.82
+"File:Harleigh i.e. Harlech Castle, Merionethshire.jpeg",List of castles in Wales,0.18631057323519606,"['harlech', 'merionethshire', 'castle']",4969,268,1.0,95,51,0.66
+"File:Harleigh i.e. Harlech Castle, Merionethshire.jpeg",Castles and Town Walls of King Edward in Gwynedd,0.14041699036488728,"['harlech', 'merionethshire', 'castle']",2030,6224,1.0,91,92,0.74
+"File:Harleigh i.e. Harlech Castle, Merionethshire.jpeg",James of Saint George,0.12163075107472877,"['harlech', 'merionethshire', 'castle']",1122,780,1.0,88,75,0.69
+"File:Harleigh i.e. Harlech Castle, Merionethshire.jpeg",Owain Glyndŵr,0.11190565536585473,"['harlech', 'merionethshire', 'castle']",18689,6009,1.0,99,92,0.76
+"File:Mallwyd Bridge, N. W.jpeg",Pont Minllyn,0.558872503479593,"['bridge', 'mallwyd']",99,330,1.0,37,56,0.62
+"File:Mallwyd Bridge, N. W.jpeg",Menai Bridge railway station,0.3151857865127672,"['bridge', 'mallwyd']",131,260,1.0,46,50,0.57
+"File:Mallwyd Bridge, N. W.jpeg",River Banwy,0.1491179697169494,"['bridge', 'mallwyd']",147,184,1.0,49,41,0.51
+"File:Llandaff cathedral, S.W.jpeg","Bishop's Palace, Llandaff",0.7812459732887678,"['llandaff', 'cathedral']",227,297,1.0,61,53,0.73
+"File:Llandaff cathedral, S.W.jpeg",Bishop of Llandaff,0.6397341360102997,"['llandaff', 'cathedral']",793,750,1.0,84,75,0.81
+"File:Llandaff cathedral, S.W.jpeg",Llandaff Cathedral,0.5820681801350961,"['llandaff', 'cathedral']",2367,4192,0.1111111111111111,92,92,0.63
+"File:Llandaff cathedral, S.W.jpeg",Book of Llandaff,0.47345791616471455,"['llandaff', 'cathedral']",309,653,1.0,68,72,0.72
+"File:Llandaff cathedral, S.W.jpeg",Saint Teilo,0.323522483750069,"['llandaff', 'cathedral']",673,845,1.0,82,77,0.73
+"File:Llandaff cathedral, S.W.jpeg",Sir David Mathew,0.3128035694617866,"['llandaff', 'cathedral']",2085,1350,1.0,92,83,0.77
+"File:Llandaff cathedral, S.W.jpeg",Llandaff,0.29687517492829213,"['llandaff', 'cathedral']",2196,1493,0.5,92,84,0.64
+"File:Llandaff cathedral, S.W.jpeg",Llandaff North,0.2560498185445187,"['llandaff', 'cathedral']",327,857,1.0,69,77,0.68
+"File:Llandaff cathedral, S.W.jpeg",List of musicians at English cathedrals,0.1530064077505931,"['llandaff', 'cathedral']",2236,2839,1.0,92,90,0.74
+File:Carmarthen from Mount Pleasant.jpeg,"Elim Independent Chapel, Carmarthen",0.3502648457526188,"['mount', 'carmarthen', 'pleasant']",58,235,1.0,20,47,0.51
+File:Carmarthen from Mount Pleasant.jpeg,1904–1905 Welsh revival,0.24465551435159655,"['mount', 'carmarthen', 'pleasant']",3677,2111,1.0,94,88,0.77
+File:Carmarthen from Mount Pleasant.jpeg,University of Wales Trinity Saint David,0.07749658899645538,"['mount', 'carmarthen', 'pleasant']",3117,4152,1.0,94,92,0.73
+File:Carmarthen from Mount Pleasant.jpeg,List of tautological place names,0.05413888601841346,"['mount', 'carmarthen', 'pleasant']",8030,4921,1.0,97,92,0.74
+"File:The Abbey of Llan Egwerst or Vale Crucis, and Castle Dinas Bran.jpeg",Castle Rising Castle,0.5099414605548653,"['abbey', 'castle']",1369,5355,1.0,89,92,0.83
+"File:The Abbey of Llan Egwerst or Vale Crucis, and Castle Dinas Bran.jpeg",Barnard Castle (castle),0.4615770705574635,"['abbey', 'castle']",1505,445,1.0,90,64,0.75
+"File:The Abbey of Llan Egwerst or Vale Crucis, and Castle Dinas Bran.jpeg",Castle Cary Castle,0.4487241118124871,"['abbey', 'castle']",257,659,1.0,63,73,0.7
+"File:The Abbey of Llan Egwerst or Vale Crucis, and Castle Dinas Bran.jpeg",Castle & Castle,0.42118155020978204,"['abbey', 'castle']",3211,267,1.0,94,51,0.72
+"File:The Abbey of Llan Egwerst or Vale Crucis, and Castle Dinas Bran.jpeg",Neuschwanstein Castle,0.240545904909607,"['abbey', 'castle']",64952,5305,1.0,99,92,0.79
+"File:The Abbey of Llan Egwerst or Vale Crucis, and Castle Dinas Bran.jpeg",Castle to Castle,0.22510170503038054,"['abbey', 'castle']",743,10919,1.0,83,93,0.75
+"File:The Abbey of Llan Egwerst or Vale Crucis, and Castle Dinas Bran.jpeg",Castle (TV series),0.15827524668316542,"['abbey', 'castle']",84379,2372,1.0,99,88,0.76
+"File:The Abbey of Llan Egwerst or Vale Crucis, and Castle Dinas Bran.jpeg",Elephant and Castle,0.07772334119605302,"['abbey', 'castle']",12946,5955,1.0,98,92,0.74
+File:A View of Powis Castle in Montgomery-Shire in Wales.jpeg,Ludlow Castle,0.7126486106199802,"['powis', 'montgomeryshire', 'wales', 'view', 'castle']",4921,7596,1.0,95,93,0.9
+File:A View of Powis Castle in Montgomery-Shire in Wales.jpeg,"Edward Herbert, 2nd Earl of Powis",0.6293649167842159,"['powis', 'montgomeryshire', 'wales', 'view', 'castle']",751,649,1.0,83,72,0.79
+File:A View of Powis Castle in Montgomery-Shire in Wales.jpeg,Earl of Powis,0.4052511342085132,"['powis', 'montgomeryshire', 'wales', 'view', 'castle']",1376,1046,1.0,89,81,0.78
+File:A View of Powis Castle in Montgomery-Shire in Wales.jpeg,Artemisia arborescens,0.34555551297292797,"['powis', 'montgomeryshire', 'wales', 'view', 'castle']",1081,256,1.0,87,49,0.68
+File:A View of Powis Castle in Montgomery-Shire in Wales.jpeg,Baron Grey of Powis,0.31585528455042083,"['powis', 'montgomeryshire', 'wales', 'view', 'castle']",363,1604,1.0,71,85,0.72
+File:A View of Powis Castle in Montgomery-Shire in Wales.jpeg,Hay-on-Wye,0.17160571221768925,"['powis', 'montgomeryshire', 'wales', 'view', 'castle']",7117,2302,1.0,97,88,0.76
+File:A View of Powis Castle in Montgomery-Shire in Wales.jpeg,"Edward Clive, 1st Earl of Powis",0.16285629163528828,"['powis', 'montgomeryshire', 'wales', 'view', 'castle']",1447,588,1.0,90,70,0.69
+File:A View of Powis Castle in Montgomery-Shire in Wales.jpeg,Powys,0.1515364410046685,"['powis', 'montgomeryshire', 'wales', 'view', 'castle']",7659,857,1.0,97,77,0.72
+File:Llandudno.jpeg,Llandudno Town Hall,0.6144552515466325,['llandudno'],88,518,1.0,34,68,0.66
+File:Llandudno.jpeg,Llandudno General Hospital,0.5611728393486386,['llandudno'],163,110,1.0,53,31,0.6
+File:Llandudno.jpeg,Llandudno Junction TMD,0.504364034979408,['llandudno'],41,60,1.0,10,17,0.44
+File:Llandudno.jpeg,"Llandudno, Western Cape",0.4789186825483983,['llandudno'],932,194,0.5,86,43,0.57
+File:Llandudno.jpeg,Llandudno Junction,0.47330571502182817,['llandudno'],783,453,1.0,84,65,0.74
+File:Llandudno.jpeg,Llandudno Junction railway station,0.44297976136674716,['llandudno'],711,1184,0.25,82,81,0.58
+File:Llandudno.jpeg,Conwy Valley line,0.28613603272372984,['llandudno'],811,2274,1.0,84,88,0.75
+File:Llandudno.jpeg,Llandudno,0.2744637135793374,['llandudno'],9397,3014,0.05555555555555555,97,90,0.55
+File:Llandudno.jpeg,Great Orme,0.25058917051098534,['llandudno'],3812,3325,0.3333333333333333,94,91,0.61
+File:Llandudno.jpeg,Llandudno Pier,0.16106821710339123,['llandudno'],1030,1191,0.3333333333333333,87,82,0.55
+"File:Caldicot castle, Caldicot level, Monmouthshire.jpeg",Caldicot Castle (electoral ward),1.0917654959007306,"['caldicot', 'level', 'monmouthshire', 'castle']",68,246,1.0,25,48,0.71
+"File:Caldicot castle, Caldicot level, Monmouthshire.jpeg",Caldicot Castle (1794 ship),0.9934408964082664,"['caldicot', 'level', 'monmouthshire', 'castle']",59,453,1.0,20,65,0.71
+"File:Caldicot castle, Caldicot level, Monmouthshire.jpeg",Caldicot Castle,0.8478313478927854,"['caldicot', 'level', 'monmouthshire', 'castle']",1011,804,1.0,86,76,0.87
+"File:Caldicot castle, Caldicot level, Monmouthshire.jpeg",Caldicot,0.8478313478927854,"['caldicot', 'level', 'monmouthshire', 'castle']",117,804,1.0,43,76,0.76
+"File:Caldicot castle, Caldicot level, Monmouthshire.jpeg","Caldicot, Monmouthshire",0.7653799270121152,"['caldicot', 'level', 'monmouthshire', 'castle']",1320,1176,1.0,89,81,0.87
+"File:Caldicot castle, Caldicot level, Monmouthshire.jpeg",Humphrey III de Bohun,0.46894865153353,"['caldicot', 'level', 'monmouthshire', 'castle']",584,485,1.0,80,66,0.73
+"File:Caldicot castle, Caldicot level, Monmouthshire.jpeg",Caldicot School,0.4369271428624918,"['caldicot', 'level', 'monmouthshire', 'castle']",456,1217,1.0,75,82,0.75
+"File:Caldicot castle, Caldicot level, Monmouthshire.jpeg",Monmouthshire,0.25767349422143404,"['caldicot', 'level', 'monmouthshire', 'castle']",6222,670,1.0,96,73,0.74
+"File:Caldicot castle, Caldicot level, Monmouthshire.jpeg",GWR 4073 Class,0.15622612846381204,"['caldicot', 'level', 'monmouthshire', 'castle']",3528,2600,1.0,94,89,0.75
