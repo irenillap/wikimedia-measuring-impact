@@ -2,6 +2,7 @@ import mwapi
 from mwapi.errors import APIError
 from mwviews.api import PageviewsClient
 
+import datetime
 import jellyfish
 import numpy as np
 import wikipedia
@@ -42,25 +43,36 @@ def image_usage_query(image):
     return image_usage
 
 
-def page_views_query(page):
+def page_views_query(page, start_date=False):
     """
     Function to return average monthly views on page since Jan 2020
     TODO: make this a more dynamic window, possibly determined by specified timeframe inputted by user
 
     Input:
     * page: Wikipedia page title
+    * start_date : string of start date if specified in 'YYYYMMDD' format, otherwise it will do today's date
+    * minus two years
 
     Output:
     * float of monthly average views of page
     """
     p = PageviewsClient(user_agent="measuring_impact/0.0 (irene.iriarte.c@gmail.com)")
 
+    if start_date:
+        initial_date = start_date
+    else:
+        now = datetime.datetime.now()
+        day = now.strftime("%d")
+        month = now.strftime("%m")
+        year = int(now.strftime("%Y"))
+        final_year = str(year - 2)
+        initial_date = final_year + month + day
 
     try:
         views = p.article_views('en.wikipedia', 
                                 page, 
                                 granularity='monthly', 
-                                start='20210101')
+                                start=initial_date)
     except:
         return 0
 
