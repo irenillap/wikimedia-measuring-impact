@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 
 import datetime
+import json
 
 def benchmark_values(benchmark_data, final_results):
     """
@@ -44,7 +45,7 @@ if __name__ == '__main__':
     Main pipeline used to collect, analyse images and create results of impact measure 
     """
     # Collect images in a (hardcoded for now) collection
-    images = wikidata.images_in_collection()
+    images = wikidata.images_in_collection(collection_wikipedia_id="Q21542493")
 
     # Open benchmark data to calculate accurate benchmarks for page views and page completeness
     benchmark_data = json.load(open('benchmark_data.json','r'))
@@ -80,7 +81,7 @@ if __name__ == '__main__':
 
             views = {}
             for page in search_results:
-                page_views = mwapi_queries.page_views_query(page)
+                page_views = mwapi_queries.page_views_query(page, start_date=False)
                 tf_idf.loc[tf_idf.entry==page,'page_views'] = int(page_views)
                 tf_idf.loc[tf_idf.entry==page,'page_completeness'] = mwapi_queries.page_completeness(page=page)
                 similar_images = mwapi_queries.image_uniqueness(page=page,main_image=image,relevant_words=final_words)
