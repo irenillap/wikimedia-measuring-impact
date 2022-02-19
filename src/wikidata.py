@@ -22,6 +22,7 @@ def images_owned_by():
         ?item wdt:P18 ?image.
         BIND(CONCAT("File:", STRAFTER(wikibase:decodeUri(STR(?image)), "http://commons.wikimedia.org/wiki/Special:FilePath/")) AS ?fileTitle)
       }
+    LIMIT 20
     """
 
     r = requests.get(url, params={'format': 'json',
@@ -38,28 +39,29 @@ def images_owned_by():
     return images
 
 
-def images_in_collection():
+def images_in_collection(collection_wikipedia_id, retrieval_limit=25):
     """
     Function to return 200 images on Wikimedia tagged as belonging to a certain collection
-    (currently all hardcoded)
-    POSSIBLE TODO: change to collection and limit not being hardcoded
 
     Input:
+    * collection_wikipedia_id: string of collection id from wikimedia
+    * retrieval_limit: int of limit of retrieval
 
     Output:
     * images: dictionary
     """
     url = 'https://query.wikidata.org/sparql'
 
+
     query = """
     SELECT DISTINCT *
-    WHERE {
-        ?item wdt:P195 wd:Q21542493.
+    WHERE {{
+        ?item wdt:P195 wd:{}.
         ?item wdt:P18 ?image.
         BIND(CONCAT("File:", STRAFTER(wikibase:decodeUri(STR(?image)), "http://commons.wikimedia.org/wiki/Special:FilePath/")) AS ?fileTitle)
-      }
-    LIMIT 200
-    """
+    }}
+    LIMIT {}
+    """.format(collection_wikipedia_id, retrieval_limit)
 
     r = requests.get(url, params={'format': 'json',
                                   'query': query})
