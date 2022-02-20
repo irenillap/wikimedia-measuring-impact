@@ -6,41 +6,41 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 def create_image_main_words(image_title, nlp_filter=None):
-	"""
+        """
+
 	Function to extract key words from the relevant image title. To do this, remove all digits,
 	punctuation and stopwords from image title. Also uses an nlp filter if there is one to place
 	more emphasis on words relevant to image collection (eg 'castle' for landscape images)
-
 	Inputs:
 	* image_title - string of image title as appears on Wikimedia
 	* nlp_filter - string to call on manually created nlp filter if needed
-
 	Outputs:
 	* final_words - set of final relevant words extracted from title
+	
 	"""
-    image_title_words = []
-    remove_digits = str.maketrans('', '', string.digits)
-    remove_punctuation = str.maketrans('','',string.punctuation)
+        image_title_words = []
+        remove_digits = str.maketrans('', '', string.digits)
+        remove_punctuation = str.maketrans('','',string.punctuation)
 
-    if image_title[-4:] == 'jpeg':
-        image_words = image_title[5:-4].translate(remove_digits)
-    else:
-        image_words = image_title[5:-3].translate(remove_digits)
+        if image_title[-4:] == 'jpeg':
+                image_words = image_title[5:-4].translate(remove_digits)
+        else:
+                image_words = image_title[5:-3].translate(remove_digits)
 
-    image_words = image_words.translate(remove_punctuation)
-    image_title_words = image_words.split()
-    image_title_words = [word.lower() for word in image_title_words]
+        image_words = image_words.translate(remove_punctuation)
+        image_title_words = image_words.split()
+        image_title_words = [word.lower() for word in image_title_words]
 
-    if nlp_filter:
-    	final_words = apply_nlp_filter(words=image_title_words, 
-    								   nlp_filter=nlp_filter)
+        if nlp_filter:
+                final_words = apply_nlp_filter(words=image_title_words, 
+                                                           nlp_filter=nlp_filter)
 
-    stopwords_eng = set(stopwords.words('english'))
+        stopwords_eng = set(stopwords.words('english'))
 
-    final_words = [word for word in final_words if not word in stopwords_eng]
-    final_words = set(final_words)
-    
-    return final_words
+        final_words = [word for word in final_words if not word in stopwords_eng]
+        final_words = set(final_words)
+
+        return final_words
 
 def preprocess_summaries(page_summaries):
 	"""
@@ -108,7 +108,7 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 
 	relevant_words = [word for word in final_words if word in df.columns.values]
 	relevant_df = df[relevant_words]
-	relevant_df['word_relevance'] = relevant_df.sum(axis=1).values
+	relevant_df.loc[:,'word_relevance'] = relevant_df.sum(axis=1).values
 
 	relevant_df.loc[:,'image'] = image
 
@@ -120,7 +120,7 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 
 	relevant_df.loc[:, 'entry'] = all_pages
 
-	relevant_df['relevant_words'] = [relevant_words for i in relevant_df.index]
+	relevant_df.loc[:,'relevant_words'] = pd.Series([relevant_words for i in relevant_df.index],dtype = 'object')
 	relevant_df = relevant_df[relevant_df['word_relevance'] > 0]
 	relevant_df = relevant_df.sort_values(by='word_relevance', ascending=False)
 	relevant_df = relevant_df[['image','entry','word_relevance', 'relevant_words']]
