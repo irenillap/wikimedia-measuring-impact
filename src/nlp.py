@@ -5,42 +5,55 @@ import pandas as pd
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-def create_image_main_words(image_title, nlp_filter=None):
-	"""
+from flair.data import Sentence
+
+
+def create_image_main_words(image_title, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
+        """
+
 	Function to extract key words from the relevant image title. To do this, remove all digits,
 	punctuation and stopwords from image title. Also uses an nlp filter if there is one to place
 	more emphasis on words relevant to image collection (eg 'castle' for landscape images)
-
+	
 	Inputs:
 	* image_title - string of image title as appears on Wikimedia
 	* nlp_filter - string to call on manually created nlp filter if needed
-
+	* ner_filter - whether to use a ner filter. if use, must specify a tagger
+	* tagger - a ner model
+	* output_type - type of named entity to keep. possible values are ['PER','LOC','ORG','MISC'], where PER = person name; LOC = location name; ORG = organization name; MISC = other name. default to ['PER','LOC','ORG','MISC']
+    
 	Outputs:
 	* final_words - set of final relevant words extracted from title
+	
 	"""
-    image_title_words = []
-    remove_digits = str.maketrans('', '', string.digits)
-    remove_punctuation = str.maketrans('','',string.punctuation)
+        image_title_words = []
+        remove_digits = str.maketrans('', '', string.digits)
+        remove_punctuation = str.maketrans('','',string.punctuation)
 
-    if image_title[-4:] == 'jpeg':
-        image_words = image_title[5:-4].translate(remove_digits)
-    else:
-        image_words = image_title[5:-3].translate(remove_digits)
+        if image_title[-4:] == 'jpeg':
+                image_words = image_title[5:-4].translate(remove_digits)
+        else:
+                image_words = image_title[5:-3].translate(remove_digits)
+        
+        if ner_filter:
+            if tagger == None:
+                raise Exception("must specify a tagger to use ner filter")
+            image_title_words = apply_ner_filter(image_words, tagger = tagger, output_type = output_type)
+        
+        image_words = image_words.translate(remove_punctuation)
+        image_title_words = image_words.split()
+        image_title_words = [word.lower() for word in image_title_words]
 
-    image_words = image_words.translate(remove_punctuation)
-    image_title_words = image_words.split()
-    image_title_words = [word.lower() for word in image_title_words]
+        if nlp_filter:
+                final_words = apply_nlp_filter(words=image_title_words, 
+                                                           nlp_filter=nlp_filter)
 
-    if nlp_filter:
-    	final_words = apply_nlp_filter(words=image_title_words, 
-    								   nlp_filter=nlp_filter)
+        stopwords_eng = set(stopwords.words('english'))
 
-    stopwords_eng = set(stopwords.words('english'))
+        final_words = [word for word in final_words if not word in stopwords_eng]
+        final_words = set(final_words)
 
-    final_words = [word for word in final_words if not word in stopwords_eng]
-    final_words = set(final_words)
-    
-    return final_words
+        return final_words
 
 def preprocess_summaries(page_summaries):
 	"""
@@ -107,8 +120,8 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 	df = pd.DataFrame(denselist, columns=feature_names)
 
 	relevant_words = [word for word in final_words if word in df.columns.values]
-	relevant_df = df[relevant_words]
-	relevant_df['word_relevance'] = relevant_df.sum(axis=1).values
+	relevant_df = df[relevant_words].copy()
+	relevant_df.loc[:,'word_relevance'] = relevant_df.sum(axis=1).values
 
 	relevant_df.loc[:,'image'] = image
 
@@ -120,7 +133,7 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 
 	relevant_df.loc[:, 'entry'] = all_pages
 
-	relevant_df['relevant_words'] = [relevant_words for i in relevant_df.index]
+	relevant_df.loc[:,'relevant_words'] = pd.Series([relevant_words for i in relevant_df.index],dtype = 'object')
 	relevant_df = relevant_df[relevant_df['word_relevance'] > 0]
 	relevant_df = relevant_df.sort_values(by='word_relevance', ascending=False)
 	relevant_df = relevant_df[['image','entry','word_relevance', 'relevant_words']]
@@ -156,4 +169,29 @@ def apply_nlp_filter(words, nlp_filter):
 			print("Appending {} to words".format(new_word))
 
 	return new_words
+	
+def apply_ner_filter(words, tagger, output_type):
+  
+  """
+  Function to apply a named entity recognition filter to get rid of irrelevant words
+
+  Input:
+  * words (image_title) - string of image title as appears on Wikimedia
+  * tagger - a ner model
+  * output_type - type of named entity to keep. possible values are ['PER','LOC','ORG','MISC'], where PER = person name; LOC = location name; ORG = organization name; MISC = other name
+
+  Output:
+  * filtered_words - updated set of named entity words for image title
+
+  example:
+  ner_filter('George Washington went to Washington',['PER'],SequenceTagger.load("flair/ner-english-fast"))
+  -> 'George Washington'
+  """
+
+  sentence = Sentence(words)
+
+  # predict NER tags
+  tagger.predict(sentence)
+
+  return ' '.join([entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type])
 

@@ -44,6 +44,20 @@ if __name__ == '__main__':
     """
     Main pipeline used to collect, analyse images and create results of impact measure 
     """
+    use_ner = True
+    
+    if use_ner:
+        
+        ner_filter = True
+        # load tagger
+        from flair.models import SequenceTagger
+        tagger = SequenceTagger.load("flair/ner-english-fast")
+        
+    else:
+    
+        ner_filter = False
+        tagger = None
+        
     # Collect images in a (hardcoded for now) collection
     images = wikidata.images_in_collection(collection_wikipedia_id="Q21542493")
 
@@ -65,8 +79,12 @@ if __name__ == '__main__':
     for i, image in enumerate(images):
         print("***********************************************")
         print("Processing image {}, {} out of {}".format(image, i+1, len(images)))
-        final_words = nlp.create_image_main_words(image_title=image,
-                                                  nlp_filter='landscape')
+        final_words = nlp.create_image_main_words(
+                                              image_title=image,
+                                              nlp_filter='landscape',
+                                              ner_filter = ner_filter,
+                                              tagger = tagger
+                                                  )
         search_results = mwapi_queries.word_search_query_compound(words=final_words,
                                                                   image_title=image)
         image_corpus[image] = mwapi_queries.entry_text_query(pages=search_results)
