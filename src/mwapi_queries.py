@@ -7,6 +7,7 @@ import jellyfish
 import numpy as np
 import wikipedia
 import pandas as pd
+import string
 
 def image_usage_query(image):
     """
@@ -128,12 +129,18 @@ def word_search_query_compound(words, image_title):
             image_word_search_results = wikipedia.search(compound_words[0], results=10)
             print("There are compound words, searching for {}".format(compound_words[0]))
         else:
+            remove_digits = str.maketrans('', '', string.digits)
+            remove_punctuation = str.maketrans('','',string.punctuation)
             if image_title[-4:] == 'jpeg':
-                image_word_search_results = wikipedia.search(image_title[5:-5],results=10)
-                print("There are no compound words, searching for {}".format(image_title[5:-5]))
+                search_string = image_title[5:-5].translate(remove_digits)
+                search_string = search_string.translate(remove_punctuation)
+                image_word_search_results = wikipedia.search(search_string,results=10)
+                print("There are no compound words, searching for {}".format(search_string))
             else:
-                image_word_search_results = wikipedia.search(image_title[5:-4],results=10)
-                print("There are no compound words, searching for {}".format(image_title[5:-4]))
+                search_string = image_title[5:-4].translate(remove_digits)
+                search_string = search_string.translate(remove_punctuation)
+                image_word_search_results = wikipedia.search(search_string,results=10)
+                print("There are no compound words, searching for {}".format(search_string))
     except:
         image_word_search_results = []
 
