@@ -197,6 +197,9 @@ def apply_ner_filter(words, tagger, output_type):
 
 	return ' '.join([entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type])
 
+def identity_tokenizer(text):
+	return text
+
 def ner_tokenization(words, tagger, output_type):
 	  
 	"""
