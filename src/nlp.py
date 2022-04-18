@@ -111,7 +111,8 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 	for page, summary in page_summaries.items():
 		pages.append(page)
 	
-	vectorizer = TfidfVectorizer()
+	#vectorizer = TfidfVectorizer()
+	vectorizer = TfidfVectorizer(tokenizer = identity_tokenizer,lowercase=False)
 	vectors = vectorizer.fit_transform(all_summaries)
 	feature_names = vectorizer.get_feature_names()
 	dense = vectors.todense()
@@ -194,4 +195,25 @@ def apply_ner_filter(words, tagger, output_type):
   tagger.predict(sentence)
 
   return ' '.join([entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type])
+
+def ner_tokenization(words, tagger, output_type):
+	  
+  """
+  Function to apply a named entity recognition tokenization
+
+  Input:
+  * words (image_title) - string of image title as appears on Wikimedia
+  * tagger - a ner model
+  * output_type - type of named entity to keep. possible values are ['PER','LOC','ORG','MISC'], where PER = person name; LOC = location name; ORG = organization name; MISC = other name
+
+  Output:
+  * tokenized_words
+  """
+  sentence = Sentence(words)
+  tagger.predict(sentence)
+  nerwords = [entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type]
+    
+  idx_list = [span[0].idx for span in sentence.get_spans('ner')]
+  non_nerwords = re.findall(r'(?u)\b\w\w+\b',' '.join([token.text for token in sentence.tokens if token.idx not in idx_list]))
+  return non_nerwords+nerwords
 
