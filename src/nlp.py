@@ -1,6 +1,7 @@
 import string
 import numpy as np
 import pandas as pd
+import re
 
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -173,47 +174,51 @@ def apply_nlp_filter(words, nlp_filter):
 	
 def apply_ner_filter(words, tagger, output_type):
   
-  """
-  Function to apply a named entity recognition filter to get rid of irrelevant words
+	"""
+	Function to apply a named entity recognition filter to get rid of irrelevant words
 
-  Input:
-  * words (image_title) - string of image title as appears on Wikimedia
-  * tagger - a ner model
-  * output_type - type of named entity to keep. possible values are ['PER','LOC','ORG','MISC'], where PER = person name; LOC = location name; ORG = organization name; MISC = other name
+	Input:
+	* words (image_title) - string of image title as appears on Wikimedia
+	* tagger - a ner model
+	* output_type - type of named entity to keep. possible values are ['PER','LOC','ORG','MISC'], where PER = person name; LOC = location name; ORG = organization name; MISC = other name
 
-  Output:
-  * filtered_words - updated set of named entity words for image title
+	Output:
+	* filtered_words - updated set of named entity words for image title
 
-  example:
-  ner_filter('George Washington went to Washington',['PER'],SequenceTagger.load("flair/ner-english-fast"))
-  -> 'George Washington'
-  """
+	example:
+	ner_filter('George Washington went to Washington',['PER'],SequenceTagger.load("flair/ner-english-fast"))
+	-> 'George Washington'
+	"""
 
-  sentence = Sentence(words)
+	sentence = Sentence(words)
 
-  # predict NER tags
-  tagger.predict(sentence)
+	# predict NER tags
+	tagger.predict(sentence)
 
-  return ' '.join([entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type])
+	return ' '.join([entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type])
 
 def ner_tokenization(words, tagger, output_type):
 	  
-  """
-  Function to apply a named entity recognition tokenization
+	"""
+	Function to apply a named entity recognition tokenization
 
-  Input:
-  * words (image_title) - string of image title as appears on Wikimedia
-  * tagger - a ner model
-  * output_type - type of named entity to keep. possible values are ['PER','LOC','ORG','MISC'], where PER = person name; LOC = location name; ORG = organization name; MISC = other name
+	Input:
+	* words (image_title) - string of image title as appears on Wikimedia
+	* tagger - a ner model
+	* output_type - type of named entity to keep. possible values are ['PER','LOC','ORG','MISC'], where PER = person name; LOC = location name; ORG = organization name; MISC = other name
 
-  Output:
-  * tokenized_words
-  """
-  sentence = Sentence(words)
-  tagger.predict(sentence)
-  nerwords = [entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type]
-    
-  idx_list = [span[0].idx for span in sentence.get_spans('ner')]
-  non_nerwords = re.findall(r'(?u)\b\w\w+\b',' '.join([token.text for token in sentence.tokens if token.idx not in idx_list]))
-  return non_nerwords+nerwords
+	Output:
+	* tokenized_words
+	"""
+	sentence = Sentence(words)
+	
+	tagger.predict(sentence)
+	
+	nerwords = [entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type]
+
+	idx_list = [span[0].idx for span in sentence.get_spans('ner')]
+	
+	non_nerwords = re.findall(r'(?u)\b\w\w+\b',' '.join([token.text for token in sentence.tokens if token.idx not in idx_list]))
+	
+	return non_nerwords+nerwords
 
