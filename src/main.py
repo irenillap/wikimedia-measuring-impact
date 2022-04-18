@@ -47,7 +47,8 @@ if __name__ == '__main__':
     use_ner = True
     
     if use_ner:
-        
+        with open(r'/content/wikimedia-measuring-impact/src/tokenized_summaries.txt') as f:
+            tokenized_summaries = eval(f.read())
         ner_filter = True
         # load tagger
         from flair.models import SequenceTagger
@@ -89,10 +90,16 @@ if __name__ == '__main__':
                                                                   image_title=image)
         image_corpus[image] = mwapi_queries.entry_text_query(pages=search_results)
         if len(search_results) > 0:
-            tf_idf = nlp.tf_idf(page_summaries=image_corpus[image],
-                                training_summaries=summaries,
-                                final_words=final_words,
-                                image=image)
+            if use_ner:
+                tf_idf = nlp.tf_idf(page_summaries={k:nlp.ner_tokenization(v, tagger, ['PER','LOC','ORG','MISC']) for k,v in image_corpus[image].items()},
+                                    training_summaries=tokenized_summaries,
+                                    final_words=final_words,
+                                    image=image)
+            else:
+                tf_idf = nlp.tf_idf(page_summaries=image_corpus[image],
+                                    training_summaries=summaries,
+                                    final_words=final_words,
+                                    image=image)
 
             tf_idf.loc[:,'page_views'] = np.tile(None, len(tf_idf))
             tf_idf.loc[:,'page_completeness'] = np.tile(None, len(tf_idf))
