@@ -189,18 +189,15 @@ def apply_ner_filter(words, tagger, output_type):
 	ner_filter('George Washington went to Washington',['PER'],SequenceTagger.load("flair/ner-english-fast"))
 	-> 'George Washington'
 	"""
-
-	sentence = Sentence(words)
-
-	# predict NER tags
-	tagger.predict(sentence)
-
-	return ' '.join([entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type])
+	return ner_tokenization(words, tagger, output_type, return_nonnerwords = False)
 
 def identity_tokenizer(text):
+	"""
+	helper function for sklearn tfidfvectorizer
+	"""
 	return text
 
-def ner_tokenization(words, tagger, output_type):
+def ner_tokenization(words, tagger, output_type,return_nonnerwords = True):
 	  
 	"""
 	Function to apply a named entity recognition tokenization
@@ -209,6 +206,7 @@ def ner_tokenization(words, tagger, output_type):
 	* words (image_title) - string of image title as appears on Wikimedia
 	* tagger - a ner model
 	* output_type - type of named entity to keep. possible values are ['PER','LOC','ORG','MISC'], where PER = person name; LOC = location name; ORG = organization name; MISC = other name
+	* return_nonnerwords - whether to return non-ner words
 
 	Output:
 	* tokenized_words
@@ -218,10 +216,15 @@ def ner_tokenization(words, tagger, output_type):
 	tagger.predict(sentence)
 	
 	nerwords = [entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type]
+	
+	if return_nonnerwords:
 
-	idx_list = [span[0].idx for span in sentence.get_spans('ner')]
+		idx_list = [s.idx for span in sentence.get_spans('ner') for s in span]
+
+		non_nerwords = re.findall(r'(?u)\b\w\w+\b',' '.join([token.text for token in sentence.tokens if token.idx not in idx_list]))
+
+		return non_nerwords+nerwords
 	
-	non_nerwords = re.findall(r'(?u)\b\w\w+\b',' '.join([token.text for token in sentence.tokens if token.idx not in idx_list]))
-	
-	return non_nerwords+nerwords
+	else:
+		return nerwords
 
