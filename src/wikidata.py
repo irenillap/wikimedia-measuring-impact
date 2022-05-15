@@ -77,7 +77,7 @@ def images_in_collection(collection_wikipedia_id, retrieval_limit=25):
     return images
 
 
-def images_in_portrait_collection():
+def images_in_portrait_collection(collection_wikipedia_id="Q54859927", retrieval_limit=50):
     """
     Function to return 200 images on Wikimedia tagged as belonging to a certain collection
 
@@ -93,19 +93,20 @@ def images_in_portrait_collection():
 
     query = """
     SELECT DISTINCT ?item ?image ?fileTitle ?sitter ?sitterLabel
-    WHERE {
-        ?item wdt:P195 wd:Q54859927.
+    WHERE {{
+        ?item wdt:P195 wd:{}.
         ?item wdt:P18 ?image.
         BIND(CONCAT("File:", STRAFTER(wikibase:decodeUri(STR(?image)), "http://commons.wikimedia.org/wiki/Special:FilePath/")) AS ?fileTitle)
         ?item wdt:P921 ?sitter.
-        
               
-        SERVICE wikibase:label {
-       bd:serviceParam wikibase:language "en" 
+        SERVICE wikibase:label {{
+         bd:serviceParam wikibase:language "en" 
+        }}
     }}
      ORDER BY ASC(?item)
-     LIMIT 50
-    """
+     LIMIT {}
+    """.format(collection_wikipedia_id, retrieval_limit)
+
 
     r = requests.get(url, params={'format': 'json',
                                   'query': query})
