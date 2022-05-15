@@ -32,8 +32,10 @@ def create_image_main_words(image_title, nlp_filter=None, ner_filter = None, tag
 
     if image_title[-4:] == 'jpeg':
         image_words = image_title[5:-4].translate(remove_digits)
-    else:
+    elif image_title[-3:] == 'jpg':
         image_words = image_title[5:-3].translate(remove_digits)
+    else:
+        image_words = image_title
 
     final_words = []
 
