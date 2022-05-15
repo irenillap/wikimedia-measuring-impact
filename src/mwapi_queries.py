@@ -108,7 +108,7 @@ def page_completeness(page):
         return None 
 
 
-def word_search_query_compound(words, image_title):
+def word_search_query_compound(words, image_title, use_wikimedia):
     """
     Function to return potential Wikipedia entry candidates for a certain image. If compound words (eg 'Harlem castle') 
     exist in set of relevant words, this will be the main search. Otherwise, the whole title will be searched for instead.
@@ -131,13 +131,18 @@ def word_search_query_compound(words, image_title):
         else:
             remove_digits = str.maketrans('', '', string.digits)
             remove_punctuation = str.maketrans('','',string.punctuation)
-            if image_title[-4:] == 'jpeg':
+            if use_wikimedia and image_title[-4:] == 'jpeg':
                 search_string = image_title[5:-5].translate(remove_digits)
                 search_string = search_string.translate(remove_punctuation)
                 image_word_search_results = wikipedia.search(search_string,results=10)
                 print("There are no compound words, searching for {}".format(search_string))
-            else:
+            elif use_wikimedia and image_title[-4:] == 'jpg':
                 search_string = image_title[5:-4].translate(remove_digits)
+                search_string = search_string.translate(remove_punctuation)
+                image_word_search_results = wikipedia.search(search_string,results=10)
+                print("There are no compound words, searching for {}".format(search_string))
+            else:
+                search_string = image_title.translate(remove_digits)
                 search_string = search_string.translate(remove_punctuation)
                 image_word_search_results = wikipedia.search(search_string,results=10)
                 print("There are no compound words, searching for {}".format(search_string))
