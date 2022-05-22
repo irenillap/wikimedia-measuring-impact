@@ -9,6 +9,13 @@ import wikipedia
 import pandas as pd
 import string
 
+language_dict = {
+    "english": "en",
+    "spanish": "es",
+    "german": "de",
+    "italian": "it"
+}
+
 def image_usage_query(image):
     """
     Function to retrieve Wikipedia entries where image is being used
@@ -44,7 +51,7 @@ def image_usage_query(image):
     return image_usage
 
 
-def page_views_query(page, start_date=False):
+def page_views_query(page, language, start_date=False):
     """
     Function to return average monthly views on page since Jan 2020
     TODO: make this a more dynamic window, possibly determined by specified timeframe inputted by user
@@ -70,7 +77,8 @@ def page_views_query(page, start_date=False):
         initial_date = final_year + month + day
 
     try:
-        views = p.article_views('en.wikipedia', 
+        domain = '{}.wikipedia'.format(language_dict[language])
+        views = p.article_views(domain, 
                                 page, 
                                 granularity='monthly', 
                                 start=initial_date)
@@ -108,7 +116,7 @@ def page_completeness(page):
         return None 
 
 
-def word_search_query_compound(words, image_title, use_wikimedia):
+def word_search_query_compound(words, image_title, language, use_wikimedia):
     """
     Function to return potential Wikipedia entry candidates for a certain image. If compound words (eg 'Harlem castle') 
     exist in set of relevant words, this will be the main search. Otherwise, the whole title will be searched for instead.
@@ -124,6 +132,7 @@ def word_search_query_compound(words, image_title, use_wikimedia):
 
     compound_words = [word for word in words if len(word.split(' ')) > 1]
    
+    wikipedia.set_lang(language_dict[language])
     try:
         if len(compound_words) > 0:
             image_word_search_results = wikipedia.search(compound_words[0], results=10)
@@ -152,7 +161,7 @@ def word_search_query_compound(words, image_title, use_wikimedia):
     return image_word_search_results
 
 
-def entry_text_query(pages):
+def entry_text_query(pages, language):
     """
     Function to retrieve summaries for all possible pages
 
@@ -162,6 +171,7 @@ def entry_text_query(pages):
     Outputs:
     * page_corpus - dictionary with all pages as keys and their summaries as values
     """
+    wikipedia.set_lang(language_dict[language])
     page_corpus = {}
     for page in pages:
         try:
