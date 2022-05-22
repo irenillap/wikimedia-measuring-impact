@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from flair.data import Sentence
 
 
-def create_image_main_words(image_title, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
+def create_image_main_words(image_title, language, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
     """
 
     Function to extract key words from the relevant image title. To do this, remove all digits,
@@ -49,7 +49,7 @@ def create_image_main_words(image_title, nlp_filter=None, ner_filter = None, tag
     else:
      	final_words = image_title_words
 
-    stopwords_eng = set(stopwords.words('english'))
+    stopwords = set(stopwords.words(language))
 
     if ner_filter:
         if tagger == None:
@@ -57,7 +57,7 @@ def create_image_main_words(image_title, nlp_filter=None, ner_filter = None, tag
         ner_results = apply_ner_filter(image_words, tagger = tagger, output_type = output_type)
         final_words.append(ner_results)
 
-    final_words = [word for word in final_words if not word in stopwords_eng]
+    final_words = [word for word in final_words if not word in stopwords]
     final_words = set(final_words)
     
     return final_words
