@@ -121,7 +121,7 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 
 	#df = pd.DataFrame(denselist, columns=feature_names)
 
-	relevant_words = [word for word in final_words if word in df.columns.values]
+	relevant_words = [word for word in final_words if word in feature_names]
 	#relevant_df = df[relevant_words].copy()
 	relevant_df = pd.DataFrame(vectors[:,[vectorizer.vocabulary_[word] for word in final_words if word in feature_names]].sum(axis=1),columns = ['word_relevance'])
 
