@@ -116,14 +116,14 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 	vectorizer = TfidfVectorizer(tokenizer = identity_tokenizer,lowercase=False)
 	vectors = vectorizer.fit_transform(all_summaries)
 	feature_names = vectorizer.get_feature_names()
-	dense = vectors.todense()
-	denselist = dense.tolist()
+	#dense = vectors.todense()
+	#denselist = dense.tolist()
 
-	df = pd.DataFrame(denselist, columns=feature_names)
+	#df = pd.DataFrame(denselist, columns=feature_names)
 
 	relevant_words = [word for word in final_words if word in df.columns.values]
-	relevant_df = df[relevant_words].copy()
-	relevant_df.loc[:,'word_relevance'] = relevant_df.sum(axis=1).values
+	#relevant_df = df[relevant_words].copy()
+	relevant_df = pd.DataFrame(vectors[:,[vectorizer.vocabulary_[word] for word in final_words if word in feature_names]].sum(axis=1),columns = ['word_relevance'])
 
 	relevant_df.loc[:,'image'] = image
 
@@ -138,7 +138,7 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
 	relevant_df.loc[:,'relevant_words'] = pd.Series([relevant_words for i in relevant_df.index],dtype = 'object')
 	relevant_df = relevant_df[relevant_df['word_relevance'] > 0]
 	relevant_df = relevant_df.sort_values(by='word_relevance', ascending=False)
-	relevant_df = relevant_df[['image','entry','word_relevance', 'relevant_words']]
+	#relevant_df = relevant_df[['image','entry','word_relevance', 'relevant_words']]
 	relevant_df = relevant_df[relevant_df.entry.isin(pages)]
 
 	return relevant_df
