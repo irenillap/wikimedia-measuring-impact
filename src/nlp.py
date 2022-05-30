@@ -197,6 +197,12 @@ def identity_tokenizer(text):
 	"""
 	return text
 
+def base_tokenization(text):
+	"""
+	base tokenizer
+	"""
+    	return re.findall(r'(?u)\b\w\w+\b',text)
+
 def ner_tokenization(words, tagger, output_type,return_nonnerwords = True):
 	  
 	"""
@@ -220,8 +226,10 @@ def ner_tokenization(words, tagger, output_type,return_nonnerwords = True):
 	if return_nonnerwords:
 
 		idx_list = [s.idx for span in sentence.get_spans('ner') for s in span]
+		
+		processed_sentence = ' '.join([token.text for token in sentence.tokens if token.idx not in idx_list])
 
-		non_nerwords = re.findall(r'(?u)\b\w\w+\b',' '.join([token.text for token in sentence.tokens if token.idx not in idx_list]))
+		non_nerwords = base_tokenization(processed_sentence)
 
 		return non_nerwords+nerwords
 	
