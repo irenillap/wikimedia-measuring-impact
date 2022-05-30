@@ -7,6 +7,8 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from flair.data import Sentence
+import torch
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 import jieba
 import nagisa
