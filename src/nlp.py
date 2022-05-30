@@ -240,7 +240,7 @@ def ner_tokenization(words, tokenization, tagger, output_type, return_nonnerword
 	Output:
 	* tokenized_words
 	"""
-	sentence = Sentence(words)
+	sentence = Sentence(words).to(device)
 	
 	tagger.predict(sentence)
 	
