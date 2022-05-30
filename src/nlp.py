@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import re
 
-from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from flair.data import Sentence
@@ -201,30 +200,30 @@ def identity_tokenizer(text):
 	"""
 	return text
 
-def base_tokenization(text, stopwords = None):
+def base_tokenization(text, stopword = None):
 
     doc = re.findall(r'(?u)\b\w\w+\b',text)
     
-    if stopwords != None:
-        return [word for word in doc if not word in stopwords]
+    if stopword != None:
+        return [word for word in doc if not word in stopword]
     else:
         return doc
 
-def chinese_tokenization(text, stopwords = None):
+def chinese_tokenization(text, stopword = None):
 
     doc = jieba.lcut(text)
 
-    if stopwords != None:
-        return [word for word in doc if not word in stopwords]
+    if stopword != None:
+        return [word for word in doc if not word in stopword]
     else:
         return doc
 
-def japanese_tokenization(text, stopwords = None):
+def japanese_tokenization(text, stopword = None):
 
     doc = nagisa.tagging(text)
 
-    if stopwords != None:
-        return [word for word in doc.words if not word in stopwords]
+    if stopword != None:
+        return [word for word in doc.words if not word in stopword]
     else:
         return doc.words
 
