@@ -8,6 +8,8 @@ import numpy as np
 import datetime
 import json
 
+from nltk.corpus import stopwords
+
 def benchmark_values(benchmark_data, final_results):
     """
     Function to benchmark relevant Wikipedia entry values into percentiles based on benchmark data
@@ -44,20 +46,68 @@ if __name__ == '__main__':
     """
     Main pipeline used to collect, analyse images and create results of impact measure 
     """
+    languages = {'english':{'tokenization':nlp.base_tokenization,
+                            'stopwords':stopwords.words('english'),
+                            'ner':'flair/ner-english-fast'},
+                 'french':{'tokenization':nlp.base_tokenization,
+                            'stopwords':stopwords.words('french'),
+                            'ner':'flair/ner-french'},
+                 'german':{'tokenization':nlp.base_tokenization,
+                            'stopwords':stopwords.words('german'),
+                            'ner':'flair/ner-german'},
+                 'spanish':{'tokenization':nlp.base_tokenization,
+                            'stopwords':stopwords.words('spanish'),
+                            'ner':'flair/ner-spanish-large'},
+                 'dutch':{'tokenization':nlp.base_tokenization,
+                            'stopwords':stopwords.words('dutch'),
+                            'ner':'flair/ner-dutch'},
+                 'chinese':{'tokenization':nlp.chinese_tokenization,
+                            'stopwords':None,
+                            'ner':None},
+                 'japanese':{'tokenization':nlp.japanese_tokenization,
+                            'stopwords':None,
+                            'ner':None}}
+    language = 'english'
+    
+    tokenizer = languages[selected_language]['tokenization']
+    
+    stopword = languages[selected_language]['stopwords']
+    
     use_ner = True
     
     if use_ner:
-        with open(r'/content/wikimedia-measuring-impact/src/tokenized_summaries.txt') as f:
-            tokenized_summaries = eval(f.read())
-        ner_filter = True
-        # load tagger
-        from flair.models import SequenceTagger
-        tagger = SequenceTagger.load("flair/ner-english-fast")
+        
+        try:
+            
+            ner_model_name = languages[selected_language]['ner']
+            
+            ner_filter = True
+            
+            # load tagger
+            
+            from flair.models import SequenceTagger
+
+            tagger = SequenceTagger.load(ner_model_name)
+            
+        except:
+            
+            print('language not supported')
+            
+            use_ner = False
+            
+            ner_filter = False
+            
+            tagger = None
         
     else:
     
         ner_filter = False
+        
         tagger = None
+        
+    with open(r'/content/wikimedia-measuring-impact/src/tokenized_summaries.txt') as f:
+        
+        tokenized_summaries = eval(f.read())
         
     # Collect images in a (hardcoded for now) collection
     images = wikidata.images_in_collection()
@@ -82,6 +132,7 @@ if __name__ == '__main__':
         print("Processing image {}, {} out of {}".format(image, i+1, len(images)))
         final_words = nlp.create_image_main_words(
                                               image_title=image,
+                                              stopword = stopword,
                                               nlp_filter='landscape',
                                               ner_filter = ner_filter,
                                               tagger = tagger
@@ -91,12 +142,12 @@ if __name__ == '__main__':
         image_corpus[image] = mwapi_queries.entry_text_query(pages=search_results)
         if len(search_results) > 0:
             if use_ner:
-                tf_idf = nlp.tf_idf(page_summaries={k:nlp.ner_tokenization(v, tagger, ['PER','LOC','ORG','MISC']) for k,v in image_corpus[image].items()},
+                tf_idf = nlp.tf_idf(page_summaries={k:nlp.ner_tokenization(v, tokenizer, tagger, ['PER','LOC','ORG','MISC']) for k,v in image_corpus[image].items()},
                                     training_summaries=tokenized_summaries,
                                     final_words=final_words,
                                     image=image)
             else:
-                tf_idf = nlp.tf_idf(page_summaries={k:nlp.base_tokenization(v) for k,v in image_corpus[image].items()},
+                tf_idf = nlp.tf_idf(page_summaries={k:tokenizer(v, stopword = stopword) for k,v in image_corpus[image].items()},
                                     training_summaries=summaries,
                                     final_words=final_words,
                                     image=image)
