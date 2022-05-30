@@ -202,7 +202,7 @@ def identity_tokenizer(text):
 
 def base_tokenization(text, stopword = None):
 
-    doc = re.findall(r'(?u)\b\w\w+\b',text)
+    doc = [i.lower() for i in re.findall(r'(?u)\b\w\w+\b',text)]
     
     if stopword != None:
         return [word for word in doc if not word in stopword]
@@ -245,7 +245,7 @@ def ner_tokenization(words, tokenizer, stopword, tagger, output_type, return_non
 	
 	tagger.predict(sentence.to(device))
 	
-	nerwords = [entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type]
+	nerwords = [entity.text.lower() for entity in sentence.get_spans('ner') if entity.tag in output_type]
 	
 	if return_nonnerwords:
 
