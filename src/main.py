@@ -143,7 +143,7 @@ if __name__ == '__main__':
         image_corpus[image] = mwapi_queries.entry_text_query(pages=search_results)
         if len(search_results) > 0:
             if use_ner:
-                tf_idf = nlp.tf_idf(page_summaries={k:nlp.ner_tokenization(v, tokenizer, tagger, ['PER','LOC','ORG','MISC']) for k,v in image_corpus[image].items()},
+                tf_idf = nlp.tf_idf(page_summaries={k:nlp.ner_tokenization(v, tokenizer, stopword, tagger, ['PER','LOC','ORG','MISC']) for k,v in image_corpus[image].items()},
                                     training_summaries=tokenized_summaries,
                                     final_words=final_words,
                                     image=image)
