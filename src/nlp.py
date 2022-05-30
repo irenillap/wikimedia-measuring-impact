@@ -8,6 +8,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from flair.data import Sentence
 
+import jieba
+import nagisa
 
 def create_image_main_words(image_title, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
         """
@@ -203,7 +205,20 @@ def base_tokenization(text):
 	"""
     	return re.findall(r'(?u)\b\w\w+\b',text)
 
-def ner_tokenization(words, tagger, output_type,return_nonnerwords = True):
+def chinese_tokenization(text):
+	"""
+	chinese tokenizer
+	"""
+    	return jieba.lcut(text)
+
+def japanese_tokenization(text):
+	"""
+	japanese tokenizer
+	"""
+    	doc = nagisa.tagging(text)
+    	return doc.words
+
+def ner_tokenization(words, tokenization, tagger, output_type, return_nonnerwords = True):
 	  
 	"""
 	Function to apply a named entity recognition tokenization
@@ -229,7 +244,7 @@ def ner_tokenization(words, tagger, output_type,return_nonnerwords = True):
 		
 		processed_sentence = ' '.join([token.text for token in sentence.tokens if token.idx not in idx_list])
 
-		non_nerwords = base_tokenization(processed_sentence)
+		non_nerwords = tokenization(processed_sentence)
 
 		return non_nerwords+nerwords
 	
