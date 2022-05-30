@@ -52,7 +52,7 @@ def create_image_main_words(image_title, tokenizer, stopword, nlp_filter=None, n
                 final_words = apply_nlp_filter(words=image_title_words, 
                                                            nlp_filter=nlp_filter)
 
-        stopwords = set(stopword)
+        stopwords = set(stopword) if stopword != None else set()
 
         final_words = [word for word in final_words if not word in stopwords]
         final_words = set(final_words)
