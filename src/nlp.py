@@ -242,9 +242,9 @@ def ner_tokenization(words, tokenization, tagger, output_type, return_nonnerword
 	Output:
 	* tokenized_words
 	"""
-	sentence = Sentence(words).to(device)
+	sentence = Sentence(words)
 	
-	tagger.predict(sentence)
+	tagger.predict(sentence.to(device))
 	
 	nerwords = [entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type]
 	
