@@ -42,7 +42,7 @@ def create_image_main_words(image_title, tokenizer, stopword, nlp_filter=None, n
         if ner_filter:
             if tagger == None:
                 raise Exception("must specify a tagger to use ner filter")
-            image_title_words = apply_ner_filter(image_words, tokenizer = tokenizer, tagger = tagger, output_type = output_type)
+            image_title_words = apply_ner_filter(image_words, tokenizer = tokenizer, stopword = stopword, tagger = tagger, output_type = output_type)
         
         image_words = image_words.translate(remove_punctuation)
         image_title_words = image_words.split()
@@ -175,7 +175,7 @@ def apply_nlp_filter(words, nlp_filter):
 
 	return new_words
 	
-def apply_ner_filter(words, tokenizer, tagger, output_type):
+def apply_ner_filter(words, tokenizer, stopword, tagger, output_type):
   
 	"""
 	Function to apply a named entity recognition filter to get rid of irrelevant words
@@ -192,7 +192,7 @@ def apply_ner_filter(words, tokenizer, tagger, output_type):
 	ner_filter('George Washington went to Washington',['PER'],SequenceTagger.load("flair/ner-english-fast"))
 	-> 'George Washington'
 	"""
-	return ner_tokenization(words, tokenizer, tagger, output_type, return_nonnerwords = False)
+	return ner_tokenization(words, tokenizer, stopword, tagger, output_type, return_nonnerwords = False)
 
 def identity_tokenizer(text):
 	"""
