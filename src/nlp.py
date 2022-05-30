@@ -227,7 +227,7 @@ def japanese_tokenization(text, stopword = None):
     else:
         return doc.words
 
-def ner_tokenization(words, tokenizer, tagger, output_type, return_nonnerwords = True):
+def ner_tokenization(words, tokenizer, stopword, tagger, output_type, return_nonnerwords = True):
 	  
 	"""
 	Function to apply a named entity recognition tokenization
@@ -253,7 +253,7 @@ def ner_tokenization(words, tokenizer, tagger, output_type, return_nonnerwords =
 		
 		processed_sentence = ' '.join([token.text for token in sentence.tokens if token.idx not in idx_list])
 
-		non_nerwords = tokenizer(processed_sentence)
+		non_nerwords = tokenizer(processed_sentence, stopword)
 
 		return non_nerwords+nerwords
 	
