@@ -13,7 +13,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 import jieba
 import nagisa
 
-def create_image_main_words(image_title, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
+def create_image_main_words(image_title, stopword, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
         """
 
 	Function to extract key words from the relevant image title. To do this, remove all digits,
@@ -53,9 +53,9 @@ def create_image_main_words(image_title, nlp_filter=None, ner_filter = None, tag
                 final_words = apply_nlp_filter(words=image_title_words, 
                                                            nlp_filter=nlp_filter)
 
-        stopwords_eng = set(stopwords.words('english'))
+        stopwords = set(stopword)
 
-        final_words = [word for word in final_words if not word in stopwords_eng]
+        final_words = [word for word in final_words if not word in stopwords]
         final_words = set(final_words)
 
         return final_words
