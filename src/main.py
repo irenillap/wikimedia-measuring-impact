@@ -96,7 +96,7 @@ if __name__ == '__main__':
                                     final_words=final_words,
                                     image=image)
             else:
-                tf_idf = nlp.tf_idf(page_summaries=image_corpus[image],
+                tf_idf = nlp.tf_idf(page_summaries={k:nlp.base_tokenization(v) for k,v in image_corpus[image].items()},
                                     training_summaries=summaries,
                                     final_words=final_words,
                                     image=image)
