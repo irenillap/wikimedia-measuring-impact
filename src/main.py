@@ -67,7 +67,7 @@ if __name__ == '__main__':
                  'japanese':{'tokenization':nlp.japanese_tokenization,
                             'stopwords':None,
                             'ner':None}}
-    language = 'english'
+    selected_language = 'english'
     
     tokenizer = languages[selected_language]['tokenization']
     
@@ -132,6 +132,7 @@ if __name__ == '__main__':
         print("Processing image {}, {} out of {}".format(image, i+1, len(images)))
         final_words = nlp.create_image_main_words(
                                               image_title=image,
+                                              tokenizer = tokenizer,
                                               stopword = stopword,
                                               nlp_filter='landscape',
                                               ner_filter = ner_filter,
