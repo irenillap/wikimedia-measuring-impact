@@ -12,7 +12,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 import jieba
 import nagisa
 
-def create_image_main_words(image_title, stopword, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
+def create_image_main_words(image_title, tokenizer, stopword, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
         """
 
 	Function to extract key words from the relevant image title. To do this, remove all digits,
@@ -42,7 +42,7 @@ def create_image_main_words(image_title, stopword, nlp_filter=None, ner_filter =
         if ner_filter:
             if tagger == None:
                 raise Exception("must specify a tagger to use ner filter")
-            image_title_words = apply_ner_filter(image_words, tagger = tagger, output_type = output_type)
+            image_title_words = apply_ner_filter(image_words, tokenizer = tokenizer, tagger = tagger, output_type = output_type)
         
         image_words = image_words.translate(remove_punctuation)
         image_title_words = image_words.split()
@@ -175,7 +175,7 @@ def apply_nlp_filter(words, nlp_filter):
 
 	return new_words
 	
-def apply_ner_filter(words, tagger, output_type):
+def apply_ner_filter(words, tokenizer, tagger, output_type):
   
 	"""
 	Function to apply a named entity recognition filter to get rid of irrelevant words
@@ -192,7 +192,7 @@ def apply_ner_filter(words, tagger, output_type):
 	ner_filter('George Washington went to Washington',['PER'],SequenceTagger.load("flair/ner-english-fast"))
 	-> 'George Washington'
 	"""
-	return ner_tokenization(words, tagger, output_type, return_nonnerwords = False)
+	return ner_tokenization(words, tokenizer, tagger, output_type, return_nonnerwords = False)
 
 def identity_tokenizer(text):
 	"""
@@ -227,7 +227,7 @@ def japanese_tokenization(text, stopword = None):
     else:
         return doc.words
 
-def ner_tokenization(words, tokenization, tagger, output_type, return_nonnerwords = True):
+def ner_tokenization(words, tokenizer, tagger, output_type, return_nonnerwords = True):
 	  
 	"""
 	Function to apply a named entity recognition tokenization
@@ -253,7 +253,7 @@ def ner_tokenization(words, tokenization, tagger, output_type, return_nonnerword
 		
 		processed_sentence = ' '.join([token.text for token in sentence.tokens if token.idx not in idx_list])
 
-		non_nerwords = tokenization(processed_sentence)
+		non_nerwords = tokenizer(processed_sentence)
 
 		return non_nerwords+nerwords
 	
