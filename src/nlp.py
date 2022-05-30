@@ -199,24 +199,32 @@ def identity_tokenizer(text):
 	"""
 	return text
 
-def base_tokenization(text):
-	"""
-	base tokenizer
-	"""
-    	return re.findall(r'(?u)\b\w\w+\b',text)
+def base_tokenization(text, stopwords = None):
 
-def chinese_tokenization(text):
-	"""
-	chinese tokenizer
-	"""
-    	return jieba.lcut(text)
+    doc = re.findall(r'(?u)\b\w\w+\b',text)
+    
+    if stopwords != None:
+        return [word for word in doc if not word in stopwords]
+    else:
+        return doc
 
-def japanese_tokenization(text):
-	"""
-	japanese tokenizer
-	"""
-    	doc = nagisa.tagging(text)
-    	return doc.words
+def chinese_tokenization(text, stopwords = None):
+
+    doc = jieba.lcut(text)
+
+    if stopwords != None:
+        return [word for word in doc if not word in stopwords]
+    else:
+        return doc
+
+def japanese_tokenization(text, stopwords = None):
+
+    doc = nagisa.tagging(text)
+
+    if stopwords != None:
+        return [word for word in doc.words if not word in stopwords]
+    else:
+        return doc.words
 
 def ner_tokenization(words, tokenization, tagger, output_type, return_nonnerwords = True):
 	  
