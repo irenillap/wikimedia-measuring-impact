@@ -2,18 +2,22 @@ import mwapi
 from mwapi.errors import APIError
 from mwviews.api import PageviewsClient
 
+import nlp
+
 import datetime
 import jellyfish
 import numpy as np
 import wikipedia
 import pandas as pd
 import string
+import requests
 
 language_dict = {
     "english": "en",
     "spanish": "es",
     "german": "de",
-    "italian": "it"
+    "italian": "it",
+    "welsh": "cy"
 }
 
 def image_usage_query(image):
@@ -97,6 +101,57 @@ def page_views_query(page, language, start_date=False):
     return np.mean(average_since_2020)
 
 
+def page_views_query_requests(page, language, start_date=False):
+    """
+    Function to return average monthly views on page since Jan 2020
+    TODO: make this a more dynamic window, possibly determined by specified timeframe inputted by user
+
+    Input:
+    * page: Wikipedia page title
+    * start_date : string of start date if specified in 'YYYYMMDD' format, otherwise it will do today's date
+    * minus two years
+
+    Output:
+    * float of monthly average views of page
+    """
+    if start_date:
+        initial_date = start_date
+    else:
+        now = datetime.datetime.now()
+        day = now.strftime("%d")
+        month = now.strftime("%m")
+        year = int(now.strftime("%Y"))
+        final_year = str(year - 2)
+        initial_date = final_year + month + day
+        end_date = str(year) + month + day
+
+    try:
+        headers = {'User-Agent': 'irene.iriarte.c@gmail.com'}
+        page = page.replace(' ', '_')
+        url = 'https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/{}.wikipedia/all-access/all-agents/{}/monthly/{}/{}'.format(
+            language_dict[language],
+            page,
+            initial_date,
+            end_date)
+
+        resp = requests.get(url, headers=headers)
+
+        data = resp.json()
+
+    except:
+        return 0
+
+    if 'items' not in data:
+        return 0
+
+    average_since_2020 = []
+    for month in data['items']:
+        if month['views'] is not None:
+            average_since_2020.append(month['views'])
+
+    return np.mean(average_since_2020)
+
+
 def page_completeness(page):
     """
     Function to return the number of words in a Wikipedia page
@@ -116,7 +171,7 @@ def page_completeness(page):
         return None 
 
 
-def word_search_query_compound(words, image_title, language, use_wikimedia):
+def word_search_query_compound(words, image_title, language_process, language_search, use_wikimedia):
     """
     Function to return potential Wikipedia entry candidates for a certain image. If compound words (eg 'Harlem castle') 
     exist in set of relevant words, this will be the main search. Otherwise, the whole title will be searched for instead.
@@ -132,31 +187,36 @@ def word_search_query_compound(words, image_title, language, use_wikimedia):
 
     compound_words = [word for word in words if len(word.split(' ')) > 1]
    
-    wikipedia.set_lang(language_dict[language])
-    try:
-        if len(compound_words) > 0:
-            image_word_search_results = wikipedia.search(compound_words[0], results=10)
-            print("There are compound words, searching for {}".format(compound_words[0]))
+    wikipedia.set_lang(language_dict[language_search])
+
+    # try:
+    if len(compound_words) > 0:
+        search_terms = nlp.translate_search_terms(compound_words[0], language_process, language_search)
+        image_word_search_results = wikipedia.search(compound_words[0], results=10)
+        print("There are compound words, searching for {}".format(search_terms))
+    else:
+        remove_digits = str.maketrans('', '', string.digits)
+        remove_punctuation = str.maketrans('','',string.punctuation)
+        if use_wikimedia and image_title[-4:] == 'jpeg':
+            search_string = image_title[5:-5].translate(remove_digits)
+            search_string = search_string.translate(remove_punctuation)
+            search_string = nlp.translate_search_terms(search_string, language_process, language_search)
+            image_word_search_results = wikipedia.search(search_string,results=10)
+            print("There are no compound words, searching for {}".format(search_string))
+        elif use_wikimedia and image_title[-4:] == 'jpg':
+            search_string = image_title[5:-4].translate(remove_digits)
+            search_string = search_string.translate(remove_punctuation)
+            search_string = nlp.translate_search_terms(search_string, language_process, language_search)
+            image_word_search_results = wikipedia.search(search_string,results=10)
+            print("There are no compound words, searching for {}".format(search_string))
         else:
-            remove_digits = str.maketrans('', '', string.digits)
-            remove_punctuation = str.maketrans('','',string.punctuation)
-            if use_wikimedia and image_title[-4:] == 'jpeg':
-                search_string = image_title[5:-5].translate(remove_digits)
-                search_string = search_string.translate(remove_punctuation)
-                image_word_search_results = wikipedia.search(search_string,results=10)
-                print("There are no compound words, searching for {}".format(search_string))
-            elif use_wikimedia and image_title[-4:] == 'jpg':
-                search_string = image_title[5:-4].translate(remove_digits)
-                search_string = search_string.translate(remove_punctuation)
-                image_word_search_results = wikipedia.search(search_string,results=10)
-                print("There are no compound words, searching for {}".format(search_string))
-            else:
-                search_string = image_title.translate(remove_digits)
-                search_string = search_string.translate(remove_punctuation)
-                image_word_search_results = wikipedia.search(search_string,results=10)
-                print("There are no compound words, searching for {}".format(search_string))
-    except:
-        image_word_search_results = []
+            search_string = image_title.translate(remove_digits)
+            search_string = search_string.translate(remove_punctuation)
+            search_string = nlp.translate_search_terms(search_string, language_process, language_search)
+            image_word_search_results = wikipedia.search(search_string,results=10)
+            print("There are no compound words, searching for {}".format(search_string))
+    # except:
+    #     image_word_search_results = []
 
     return image_word_search_results
 
