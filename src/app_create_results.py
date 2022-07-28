@@ -4,16 +4,33 @@ import pandas as pd
 import numpy as np
 import urllib.request
 import wikipedia
+from nltk.corpus import stopwords
 
 import nlp
 import wikidata
 import mwapi_queries
-import pyperclip
-
 
 import datetime
 import json
 from stqdm import stqdm
+
+languages_list =  ['-', 'afrikaans', 'albanian','amharic','arabic','armenian','azerbaijani','basque','belarusian','bengali','bosnian','bulgarian',
+'catalan','cebuano','chichewa','chinese (traditional)','corsican','croatian','czech','danish','dutch','english',
+'esperanto','estonian','filipino','finnish','french','frisian','galician','georgian','german','greek','gujarati','haitian creole','hausa',
+'hawaiian','hebrew','hindi','hungarian','icelandic','igbo','indonesian','irish','italian','japanese','kannada','kazakh',
+'khmer','korean','kurdish (kurmanji)','kyrgyz','lao','latin','latvian','lithuanian','luxembourgish','macedonian','malagasy','malay',
+'malayalam','maltese','maori','marathi','mongolian','myanmar (burmese)','nepali','norwegian','odia','pashto','persian','polish','portuguese',
+'punjabi','romanian','russian','samoan','scots gaelic','serbian','sesotho','shona','sindhi','sinhala','slovak','slovenian','somali', 'spanish',
+'sundanese','swahili','swedish','tajik','tamil','telugu','thai','turkish','ukrainian','urdu','uyghur','uzbek','vietnamese','welsh','xhosa','yiddish',
+'yoruba','zulu']
+
+ner_dict = {'english':'flair/ner-english-fast',
+			'french':'flair/ner-french',
+			'german':'flair/ner-german',
+			'spanish':'flair/ner-spanish-large'}
+
+tokenizer_dict = {'chinese':nlp.chinese_tokenization,
+				  'japanese':nlp.japanese_tokenization}
 
 
 def benchmark_values(benchmark_data, final_results):
@@ -48,6 +65,7 @@ def benchmark_values(benchmark_data, final_results):
 
 	return pageviewsperc, pagecompletenessperc
 
+@st.cache(suppress_st_warning=True)
 def calculate_results(images, use_wikimedia, language_process, language_search):
 	if use_wikimedia == "Yes":
 		use_wikimedia = True
@@ -55,21 +73,34 @@ def calculate_results(images, use_wikimedia, language_process, language_search):
 		use_wikimedia = False
 
 	st.header("Calculating results")
-	use_ner = True
 
-	if use_ner:
+	if language_process in ner_dict.keys():
 		ner_filter = True
 		# load tagger
 		from flair.models import SequenceTagger
-		st.write("Loading NER model")
-		tagger = SequenceTagger.load("flair/ner-english-fast")
+		st.write("Loading NER model: ", ner_dict[language_process])
+		tagger = SequenceTagger.load(ner_dict[language_process])
 		
 	else:
 
 		ner_filter = False
+		st.write("Not using NER model")
 		tagger = None
 
+	if language_process in tokenizer_dict.keys():
+		tokenizer = tokenizer_dict[language_process]
+	else:
+		tokenizer = nlp.base_tokenization
+
+	try:
+		stopword = set(stopwords.words(language_process))
+	except:
+		stopword = None
+
 	st.write("Collecting benchmark data")
+
+	with urllib.request.urlopen("https://measuring-impact-wikimedia.s3.eu-west-1.amazonaws.com/benchmark-data/25-06-2022/tokenized_summaries.txt") as url:
+		tokenized_summaries = eval(url.read().decode()) 
 
 	with urllib.request.urlopen("https://measuring-impact-wikimedia.s3.eu-west-1.amazonaws.com/benchmark-data/25-06-2022/benchmark_data.json") as url:
 		benchmark_data = json.loads(url.read().decode()) 
@@ -78,9 +109,6 @@ def calculate_results(images, use_wikimedia, language_process, language_search):
  
 	image_corpus = {}
 	final_results = pd.DataFrame()
-
-	# JUST FOR DEBUGGING _ DELETE
-	images = images[:250]
 
 	first_words = []
 	for i in stqdm(range(len(images))):
@@ -91,6 +119,7 @@ def calculate_results(images, use_wikimedia, language_process, language_search):
 		print("***********************************************")
 		print("Processing image {}, {} out of {}".format(image, i+1, len(images)))
 		final_words = nlp.create_image_main_words(image_title=image,
+												  tokenizer=tokenizer,
 												  language=language_process,
 												  nlp_filter=None,
 												  ner_filter = ner_filter,
@@ -106,10 +135,16 @@ def calculate_results(images, use_wikimedia, language_process, language_search):
 															 language=language_search)
 
 		if len(search_results) > 0:
-			tf_idf = nlp.tf_idf(page_summaries=image_corpus[image],
-								training_summaries=summaries,
-								final_words=final_words,
-								image=image)
+			if ner_filter:
+				tf_idf = nlp.tf_idf(page_summaries={k:nlp.ner_tokenization(v, tokenizer, stopword, tagger, ['PER','LOC','ORG','MISC']) for k,v in image_corpus[image].items()},
+										training_summaries=tokenized_summaries,
+										final_words=final_words,
+										image=image)
+			else:
+				tf_idf = nlp.tf_idf(page_summaries={k:tokenizer(v, stopword = stopword) for k,v in image_corpus[image].items()},
+										training_summaries=summaries,
+										final_words=final_words,
+										image=image)
 
 			tf_idf.loc[:,'page_views'] = np.tile(None, len(tf_idf))
 			tf_idf.loc[:,'page_completeness'] = np.tile(None, len(tf_idf))
@@ -150,11 +185,8 @@ def calculate_results(images, use_wikimedia, language_process, language_search):
 
 		st.write("Finished calculating results")
 		st.dataframe(final_results)
-		# Save results to csv
-		file_name = "impact_results_{}.csv".format(datetime.datetime.now())
-		st.download_button("Download csv file of results", final_results.to_csv(index=False), file_name, "text/csv")
-		# st.write("Final results saved to {}".format("final_results_portraits_stlit.csv"))
-		# final_results.to_csv('final_results_portraits_stlit.csv',index=False)
+
+		return final_results
 
 
 st.title("Create Open Access Analysis Data")
@@ -164,72 +196,59 @@ use_wikimedia = st.radio("Is the collection uploaded on Wikimedia?",
 
 if use_wikimedia == "Yes":
 	collection_id = st.text_input("Input the Wikimedia ID of the collection")
-	if len(collection_id) > 0:
-		images = wikidata.images_in_collection(collection_wikipedia_id=collection_id, retrieval_limit=500)
+	limit = st.slider("How many items from the collection do you want to process? (Maximum of 250)", max_value=250, value=100)
+	offset = st.text_input("If you have already processed some collection items, how many have you processed? Introduce 0 if you have processed none. Press Enter to confirm the number")
+	if len(collection_id) > 0 and limit and offset:
+		images = wikidata.images_in_collection(collection_wikipedia_id=collection_id, retrieval_limit=limit, offset=offset)
 		
-		language_process = st.radio("Select the main language for the data analysis",
-								 ("english", "spanish", "italian", "german"))
+		language_process = st.selectbox("Select the main language for the data analysis", languages_list)
 
-		language_search = st.radio("Select the main language of Wikipedia entries to search",
-								 ("english", "spanish", "italian", "german"))
+		language_search = st.selectbox("Select the main language of Wikipedia entries to search", languages_list)
+
 
 		confirm_lang = st.button("Confirm language selection")
 
 		if confirm_lang:
-			calculate_results(images, use_wikimedia, language_process, language_search)	
+			final_results = calculate_results(images, use_wikimedia, language_process, language_search)	
+
+			if final_results is not None:
+				# Save results to csv
+				file_name = "impact_results_{}.csv".format(datetime.datetime.now())
+				st.download_button("Download csv file of results", final_results.to_csv(index=False), file_name, "text/csv")
+
 
 
 elif use_wikimedia == "No":
 
-	# use_paste = st.radio("Is the collection in an xml file?", 
-	# 						("Yes", "No"))
-
-	# if use_paste == "Yes":
 	st.subheader("Instructions")
 	st.write("You can upload your collection from a file which should contain a unique id per item as well as any fields containing metadata about your items such as title, author or locations")
-	st.write("The file should be in xml format")
+	st.write("The file should be in xml or csv format")
 	st.write("For best results, ensure any non-relevant columns are not present in the file")
-	# file_format = st.radio("Select the file format (Note that if the format does not appear in the list below, the format is not yet supported)", 
-	# 						(".csv", ".xlsx"))
-	file_format = ".xml"
 	uploaded_file = st.file_uploader("Choose the file containing your collection")
 
-	if uploaded_file is not None:
-		if uploaded_file.name.split(".")[-1] != file_format[1:]:
-			st.subheader("Error")
-			st.text('Your file type .{} does not match the selected extension .{}'.format(uploaded_file.name.split(".")[-1], file_format[1:]))
-		# if file_format == ".csv":
-		# 	file_df = pd.read_csv(uploaded_file)
-		# elif file_format == ".xlsx":
-		# 	file_df = pd.read_excel(uploaded_file, engine='openpyxl', header=1)
-		if file_format == ".xml":
+	if uploaded_file is not None and uploaded_file.name.split(".")[-1] not in ("csv", "xml"): 
+		st.warning("Your file type is not recognised - please upload a .csv or .xml")
+
+	if uploaded_file is not None and uploaded_file.name.split(".")[-1] in ("csv", "xml"): 
+		if uploaded_file.name.split(".")[-1] == "csv":
+			file_df = pd.read_csv(uploaded_file)
+		if uploaded_file.name.split(".")[-1] == "xml":
 			file_df = pd.read_xml(uploaded_file)
 		st.dataframe(file_df)
 
 		file_df["aggregate_string"] = file_df.apply(lambda x: str([value for value in x if not pd.isnull(value)]), axis=1)
 		images = file_df.aggregate_string.values
 
-		language_process = st.radio("Select the main language for the data analysis",
-								 ("english", "spanish", "italian", "german"))
+		language_process = st.selectbox("Select the main language for the data analysis", languages_list)
 
-		language_search = st.radio("Select the main language of Wikipedia entries to search",
-								 ("english", "spanish", "italian", "german"))
+		language_search = st.selectbox("Select the main language of Wikipedia entries to search", languages_list)
 
 		confirm_lang = st.button("Confirm language selection")
 
 		if confirm_lang:
-			calculate_results(images, use_wikimedia, language_process, language_search)	
-			
+			final_results = calculate_results(images, use_wikimedia, language_process, language_search)	
 
-	# elif use_paste == "No":
-
-	# 	st.write("Copy the data you want to use")
-	# 	data_ready = st.radio("Have you copied the data you want to use?", 
-	# 						("No", "Yes"))
-	# 	if data_ready == "Yes":
-	# 		from io import StringIO
-
-	# 		data = StringIO(pyperclip.paste())
-	# 		df = pd.read_csv(data, sep='delimiter', header=None)
-	# 		st.dataframe(df)
-
+			if final_results is not None:
+				# Save results to csv
+				file_name = "impact_results_{}.csv".format(datetime.datetime.now())
+				st.download_button("Download csv file of results", final_results.to_csv(index=False), file_name, "text/csv")
