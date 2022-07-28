@@ -39,7 +39,7 @@ def images_owned_by():
     return images
 
 
-def images_in_collection(collection_wikipedia_id, retrieval_limit=25):
+def images_in_collection(collection_wikipedia_id, retrieval_limit=None, offset=0):
     """
     Function to return 200 images on Wikimedia tagged as belonging to a certain collection
 
@@ -52,16 +52,28 @@ def images_in_collection(collection_wikipedia_id, retrieval_limit=25):
     """
     url = 'https://query.wikidata.org/sparql'
 
-
-    query = """
-    SELECT DISTINCT *
-    WHERE {{
-        ?item wdt:P195 wd:{}.
-        ?item wdt:P18 ?image.
-        BIND(CONCAT("File:", STRAFTER(wikibase:decodeUri(STR(?image)), "http://commons.wikimedia.org/wiki/Special:FilePath/")) AS ?fileTitle)
-    }}
-    LIMIT {}
-    """.format(collection_wikipedia_id, retrieval_limit)
+    if retrieval_limit is not None:
+        query = """
+        SELECT DISTINCT *
+        WHERE {{
+            ?item wdt:P195 wd:{}.
+            ?item wdt:P18 ?image.
+            BIND(CONCAT("File:", STRAFTER(wikibase:decodeUri(STR(?image)), "http://commons.wikimedia.org/wiki/Special:FilePath/")) AS ?fileTitle)
+        }}
+        ORDER BY ASC(?item)
+        LIMIT {}
+        OFFSET {}
+        """.format(collection_wikipedia_id, retrieval_limit, offset)
+    else:
+        query = """
+        SELECT DISTINCT *
+        WHERE {{
+            ?item wdt:P195 wd:{}.
+            ?item wdt:P18 ?image.
+            BIND(CONCAT("File:", STRAFTER(wikibase:decodeUri(STR(?image)), "http://commons.wikimedia.org/wiki/Special:FilePath/")) AS ?fileTitle)
+        }}
+        ORDER BY ASC(?item)
+        """.format(collection_wikipedia_id)
 
     r = requests.get(url, params={'format': 'json',
                                   'query': query})
