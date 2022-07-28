@@ -12,13 +12,20 @@ import pandas as pd
 import string
 import requests
 
-language_dict = {
-    "english": "en",
-    "spanish": "es",
-    "german": "de",
-    "italian": "it",
-    "welsh": "cy"
-}
+language_dict = {'afrikaans': 'af', 'albanian': 'sq', 'amharic': 'am', 'arabic': 'ar', 'armenian': 'hy', 'azerbaijani': 'az', 'basque': 'eu', 
+'belarusian': 'be', 'bengali': 'bn', 'bosnian': 'bs', 'bulgarian': 'bg', 'catalan': 'ca', 'cebuano': 'ceb', 'chichewa': 'ny', 
+'chinese (traditional)': 'zh-tw', 'corsican': 'co', 'croatian': 'hr', 'czech': 'cs', 'danish': 'da', 'dutch': 'nl', 
+'english': 'en', 'esperanto': 'eo', 'estonian': 'et', 'filipino': 'tl', 'finnish': 'fi', 'french': 'fr', 'frisian': 'fy',
+'galician': 'gl', 'georgian': 'ka', 'german': 'de', 'greek': 'el', 'gujarati': 'gu', 'haitian creole': 'ht', 'hausa': 'ha', 
+'hawaiian': 'haw', 'hebrew': 'he', 'hindi': 'hi', 'hungarian': 'hu', 'icelandic': 'is', 'igbo': 'ig', 'indonesian': 'id', 'irish': 'ga', 
+'italian': 'it', 'japanese': 'ja', 'kannada': 'kn', 'kazakh': 'kk', 'khmer': 'km', 'korean': 'ko', 'kurdish (kurmanji)': 'ku', 'kyrgyz': 'ky', 
+'lao': 'lo', 'latin': 'la', 'latvian': 'lv', 'lithuanian': 'lt', 'luxembourgish': 'lb', 'macedonian': 'mk', 'malagasy': 'mg', 'malay': 'ms',
+'malayalam': 'ml', 'maltese': 'mt', 'maori': 'mi', 'marathi': 'mr', 'mongolian': 'mn', 'myanmar (burmese)': 'my', 'nepali': 'ne',
+'norwegian': 'no', 'odia': 'or', 'pashto': 'ps', 'persian': 'fa', 'polish': 'pl', 'portuguese': 'pt', 'punjabi': 'pa', 
+'romanian': 'ro', 'russian': 'ru', 'samoan': 'sm', 'scots gaelic': 'gd', 'serbian': 'sr', 'sesotho': 'st', 'shona': 'sn',
+'sindhi': 'sd', 'sinhala': 'si', 'slovak': 'sk', 'slovenian': 'sl', 'somali': 'so', 'spanish': 'es', 'sundanese': 'su', 
+'swahili': 'sw', 'swedish': 'sv', 'tajik': 'tg', 'tamil': 'ta', 'telugu': 'te', 'thai': 'th', 'turkish': 'tr', 'ukrainian': 'uk', 
+'urdu': 'ur', 'uyghur': 'ug', 'uzbek': 'uz', 'vietnamese': 'vi', 'welsh': 'cy', 'xhosa': 'xh', 'yiddish': 'yi', 'yoruba': 'yo', 'zulu': 'zu'}
 
 def image_usage_query(image):
     """
@@ -80,17 +87,11 @@ def page_views_query(page, language, start_date=False):
         final_year = str(year - 2)
         initial_date = final_year + month + day
 
-    try:
-        domain = '{}.wikipedia'.format(language_dict[language])
-        views = p.article_views(domain, 
-                                page, 
-                                granularity='monthly', 
-                                start=initial_date)
-    except:
-        return 0
-
-    if len(views) == 0:
-        return 0
+    domain = '{}.wikipedia'.format(language_dict[language])
+    views = p.article_views(domain, 
+                            page, 
+                            granularity='monthly', 
+                            start=initial_date)
 
     average_since_2020 = []
     for date, view in views.items():
@@ -114,32 +115,29 @@ def page_views_query_requests(page, language, start_date=False):
     Output:
     * float of monthly average views of page
     """
+    now = datetime.datetime.now()
+    day = now.strftime("%d")
+    month = now.strftime("%m")
+    year = int(now.strftime("%Y"))
+    end_date = str(year) + month + day
+
     if start_date:
         initial_date = start_date
     else:
-        now = datetime.datetime.now()
-        day = now.strftime("%d")
-        month = now.strftime("%m")
-        year = int(now.strftime("%Y"))
         final_year = str(year - 2)
         initial_date = final_year + month + day
-        end_date = str(year) + month + day
 
-    try:
-        headers = {'User-Agent': 'irene.iriarte.c@gmail.com'}
-        page = page.replace(' ', '_')
-        url = 'https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/{}.wikipedia/all-access/all-agents/{}/monthly/{}/{}'.format(
-            language_dict[language],
-            page,
-            initial_date,
-            end_date)
+    headers = {'User-Agent': 'irene.iriarte.c@gmail.com'}
+    page = page.replace(' ', '_')
+    url = 'https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/{}.wikipedia/all-access/all-agents/{}/monthly/{}/{}'.format(
+        language_dict[language],
+        page,
+        initial_date,
+        end_date)
 
-        resp = requests.get(url, headers=headers)
+    resp = requests.get(url, headers=headers)
 
-        data = resp.json()
-
-    except:
-        return 0
+    data = resp.json()
 
     if 'items' not in data:
         return 0
