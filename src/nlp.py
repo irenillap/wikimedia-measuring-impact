@@ -9,9 +9,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from flair.data import Sentence
 
+import jieba
+import nagisa
+import re
 
 
-def create_image_main_words(image_title, language, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
+def create_image_main_words(image_title, language, tokenizer, nlp_filter=None, ner_filter = None, tagger = None, output_type = ['PER','LOC','ORG','MISC']):
     """
 
     Function to extract key words from the relevant image title. To do this, remove all digits,
@@ -46,21 +49,23 @@ def create_image_main_words(image_title, language, nlp_filter=None, ner_filter =
     image_title_words = image_words.split()
     image_title_words = [word.lower() for word in image_title_words]
 
+    try:
+        stopwords_lang = set(stopwords.words(language))
+    except:
+        stopwords_lang = []
+
     if nlp_filter:
         final_words = apply_nlp_filter(words=image_title_words, 
                                        nlp_filter=nlp_filter)
-    else:
-     	final_words = image_title_words
-
-    stopwords_lang = set(stopwords.words(language))
-
-    if ner_filter:
+    elif ner_filter:
         if tagger == None:
             raise Exception("must specify a tagger to use ner filter")
-        ner_results = apply_ner_filter(image_words, tagger = tagger, output_type = output_type)
-        final_words.append(ner_results)
+        ner_results = apply_ner_filter(image_words, tokenizer=tokenizer, stopword=stopwords_lang, tagger=tagger, output_type=output_type)
+        final_words = ner_results
+    else:
+        final_words = image_title_words
+        final_words = [word for word in final_words if word not in stopwords_lang]
 
-    final_words = [word for word in final_words if not word in stopwords_lang]
     final_words = set(final_words)
     
     return final_words
@@ -122,16 +127,13 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
     for page, summary in page_summaries.items():
         pages.append(page)
     
-    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer(tokenizer = identity_tokenizer,lowercase=False)
     vectors = vectorizer.fit_transform(all_summaries)
     feature_names = vectorizer.get_feature_names()
-    dense = vectors.todense()
-    denselist = dense.tolist()
 
-    df = pd.DataFrame(denselist, columns=feature_names)
+    relevant_words = [word for word in final_words if word in feature_names]
+    relevant_df = pd.DataFrame(vectors[:,[vectorizer.vocabulary_[word] for word in final_words if word in feature_names]].sum(axis=1),columns = ['word_relevance'])
 
-    relevant_words = [word for word in final_words if word in df.columns.values]
-    relevant_df = df[relevant_words].copy()
     relevant_df.loc[:,'word_relevance'] = relevant_df.sum(axis=1).values
 
     relevant_df.loc[:,'image'] = image
@@ -147,7 +149,6 @@ def tf_idf(page_summaries, training_summaries, final_words, image):
     relevant_df.loc[:,'relevant_words'] = pd.Series([relevant_words for i in relevant_df.index],dtype = 'object')
     relevant_df = relevant_df[relevant_df['word_relevance'] > 0]
     relevant_df = relevant_df.sort_values(by='word_relevance', ascending=False)
-    relevant_df = relevant_df[['image','entry','word_relevance', 'relevant_words']]
     relevant_df = relevant_df[relevant_df.entry.isin(pages)]
 
     return relevant_df
@@ -187,8 +188,7 @@ def apply_nlp_filter(words, nlp_filter):
 
     return new_words
     
-def apply_ner_filter(words, tagger, output_type):
-  
+def apply_ner_filter(words, tokenizer, stopword, tagger, output_type):
     """
     Function to apply a named entity recognition filter to get rid of irrelevant words
 
@@ -204,129 +204,90 @@ def apply_ner_filter(words, tagger, output_type):
     ner_filter('George Washington went to Washington',['PER'],SequenceTagger.load("flair/ner-english-fast"))
     -> 'George Washington'
     """
+    return ner_tokenization(words, tokenizer, stopword, tagger, output_type, return_nonnerwords = False)
 
+def identity_tokenizer(text):
+    """
+    helper function for sklearn tfidfvectorizer
+    """
+    return text
+
+def base_tokenization(text, stopword = None):
+
+    doc = [i.lower() for i in re.findall(r'(?u)\b\w\w+\b',text)]
+    
+    if stopword != None:
+        return [word for word in doc if not word in stopword]
+    else:
+        return doc
+
+def chinese_tokenization(text, stopword = None):
+
+    doc = jieba.lcut(text)
+
+    if stopword != None:
+        return [word for word in doc if not word in stopword]
+    else:
+        return doc
+
+def japanese_tokenization(text, stopword = None):
+
+    doc = nagisa.tagging(text)
+
+    if stopword != None:
+        return [word for word in doc.words if not word in stopword]
+    else:
+        return doc.words
+
+def ner_tokenization(words, tokenizer, stopword, tagger, output_type, return_nonnerwords = True):
+      
+    """
+    Function to apply a named entity recognition tokenization
+    Input:
+    * words (image_title) - string of image title as appears on Wikimedia
+    * tagger - a ner model
+    * output_type - type of named entity to keep. possible values are ['PER','LOC','ORG','MISC'], where PER = person name; LOC = location name; ORG = organization name; MISC = other name
+    * return_nonnerwords - whether to return non-ner words
+    Output:
+    * tokenized_words
+    """
     sentence = Sentence(words)
-
-    # predict NER tags
+    
     tagger.predict(sentence)
-    print(' '.join([entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type]))
-    return ' '.join([entity.text for entity in sentence.get_spans('ner') if entity.tag in output_type])
+    
+    nerwords = [entity.text.lower() for entity in sentence.get_spans('ner') if entity.tag in output_type]
+    
+    if return_nonnerwords:
 
+        idx_list = [s.idx for span in sentence.get_spans('ner') for s in span]
+        
+        processed_sentence = ' '.join([token.text for token in sentence.tokens if token.idx not in idx_list])
+
+        non_nerwords = tokenizer(processed_sentence, stopword)
+
+        return non_nerwords+nerwords
+    
+    else:
+        return nerwords
 
 def translate_search_terms(search_terms, language_in, language_out):
     """
     """
-    lang_dict_in = {
-    'af': 'afrikaans',
-    'sq': 'albanian',
-    'am': 'amharic',
-    'ar': 'arabic',
-    'hy': 'armenian',
-    'az': 'azerbaijani',
-    'eu': 'basque',
-    'be': 'belarusian',
-    'bn': 'bengali',
-    'bs': 'bosnian',
-    'bg': 'bulgarian',
-    'ca': 'catalan',
-    'ceb': 'cebuano',
-    'ny': 'chichewa',
-    'zh-cn': 'chinese (simplified)',
-    'zh-tw': 'chinese (traditional)',
-    'co': 'corsican',
-    'hr': 'croatian',
-    'cs': 'czech',
-    'da': 'danish',
-    'nl': 'dutch',
-    'en': 'english',
-    'eo': 'esperanto',
-    'et': 'estonian',
-    'tl': 'filipino',
-    'fi': 'finnish',
-    'fr': 'french',
-    'fy': 'frisian',
-    'gl': 'galician',
-    'ka': 'georgian',
-    'de': 'german',
-    'el': 'greek',
-    'gu': 'gujarati',
-    'ht': 'haitian creole',
-    'ha': 'hausa',
-    'haw': 'hawaiian',
-    'iw': 'hebrew',
-    'he': 'hebrew',
-    'hi': 'hindi',
-    'hmn': 'hmong',
-    'hu': 'hungarian',
-    'is': 'icelandic',
-    'ig': 'igbo',
-    'id': 'indonesian',
-    'ga': 'irish',
-    'it': 'italian',
-    'ja': 'japanese',
-    'jw': 'javanese',
-    'kn': 'kannada',
-    'kk': 'kazakh',
-    'km': 'khmer',
-    'ko': 'korean',
-    'ku': 'kurdish (kurmanji)',
-    'ky': 'kyrgyz',
-    'lo': 'lao',
-    'la': 'latin',
-    'lv': 'latvian',
-    'lt': 'lithuanian',
-    'lb': 'luxembourgish',
-    'mk': 'macedonian',
-    'mg': 'malagasy',
-    'ms': 'malay',
-    'ml': 'malayalam',
-    'mt': 'maltese',
-    'mi': 'maori',
-    'mr': 'marathi',
-    'mn': 'mongolian',
-    'my': 'myanmar (burmese)',
-    'ne': 'nepali',
-    'no': 'norwegian',
-    'or': 'odia',
-    'ps': 'pashto',
-    'fa': 'persian',
-    'pl': 'polish',
-    'pt': 'portuguese',
-    'pa': 'punjabi',
-    'ro': 'romanian',
-    'ru': 'russian',
-    'sm': 'samoan',
-    'gd': 'scots gaelic',
-    'sr': 'serbian',
-    'st': 'sesotho',
-    'sn': 'shona',
-    'sd': 'sindhi',
-    'si': 'sinhala',
-    'sk': 'slovak',
-    'sl': 'slovenian',
-    'so': 'somali',
-    'es': 'spanish',
-    'su': 'sundanese',
-    'sw': 'swahili',
-    'sv': 'swedish',
-    'tg': 'tajik',
-    'ta': 'tamil',
-    'te': 'telugu',
-    'th': 'thai',
-    'tr': 'turkish',
-    'uk': 'ukrainian',
-    'ur': 'urdu',
-    'ug': 'uyghur',
-    'uz': 'uzbek',
-    'vi': 'vietnamese',
-    'cy': 'welsh',
-    'xh': 'xhosa',
-    'yi': 'yiddish',
-    'yo': 'yoruba',
-    'zu': 'zulu'
-    }
+    lang_dict = {'afrikaans': 'af', 'albanian': 'sq', 'amharic': 'am', 'arabic': 'ar', 'armenian': 'hy', 'azerbaijani': 'az', 'basque': 'eu', 
+    'belarusian': 'be', 'bengali': 'bn', 'bosnian': 'bs', 'bulgarian': 'bg', 'catalan': 'ca', 'cebuano': 'ceb', 'chichewa': 'ny', 
+    'chinese (traditional)': 'zh-tw', 'corsican': 'co', 'croatian': 'hr', 'czech': 'cs', 'danish': 'da', 'dutch': 'nl', 
+    'english': 'en', 'esperanto': 'eo', 'estonian': 'et', 'filipino': 'tl', 'finnish': 'fi', 'french': 'fr', 'frisian': 'fy',
+    'galician': 'gl', 'georgian': 'ka', 'german': 'de', 'greek': 'el', 'gujarati': 'gu', 'haitian creole': 'ht', 'hausa': 'ha', 
+    'hawaiian': 'haw', 'hebrew': 'he', 'hindi': 'hi', 'hungarian': 'hu', 'icelandic': 'is', 'igbo': 'ig', 'indonesian': 'id', 'irish': 'ga', 
+    'italian': 'it', 'japanese': 'ja', 'kannada': 'kn', 'kazakh': 'kk', 'khmer': 'km', 'korean': 'ko', 'kurdish (kurmanji)': 'ku', 'kyrgyz': 'ky', 
+    'lao': 'lo', 'latin': 'la', 'latvian': 'lv', 'lithuanian': 'lt', 'luxembourgish': 'lb', 'macedonian': 'mk', 'malagasy': 'mg', 'malay': 'ms',
+    'malayalam': 'ml', 'maltese': 'mt', 'maori': 'mi', 'marathi': 'mr', 'mongolian': 'mn', 'myanmar (burmese)': 'my', 'nepali': 'ne',
+    'norwegian': 'no', 'odia': 'or', 'pashto': 'ps', 'persian': 'fa', 'polish': 'pl', 'portuguese': 'pt', 'punjabi': 'pa', 
+    'romanian': 'ro', 'russian': 'ru', 'samoan': 'sm', 'scots gaelic': 'gd', 'serbian': 'sr', 'sesotho': 'st', 'shona': 'sn',
+    'sindhi': 'sd', 'sinhala': 'si', 'slovak': 'sk', 'slovenian': 'sl', 'somali': 'so', 'spanish': 'es', 'sundanese': 'su', 
+    'swahili': 'sw', 'swedish': 'sv', 'tajik': 'tg', 'tamil': 'ta', 'telugu': 'te', 'thai': 'th', 'turkish': 'tr', 'ukrainian': 'uk', 
+    'urdu': 'ur', 'uyghur': 'ug', 'uzbek': 'uz', 'vietnamese': 'vi', 'welsh': 'cy', 'xhosa': 'xh', 'yiddish': 'yi', 'yoruba': 'yo', 'zulu': 'zu'}
 
-    lang_dict = dict((v, k) for k, v in lang_dict_in.items())
 
     if language_in != language_out:
         translator = Translator()
