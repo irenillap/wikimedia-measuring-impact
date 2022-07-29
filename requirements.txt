@@ -14,3 +14,5 @@ flair==0.10
 googletrans==3.0.0
 boto3==1.24.40
 nltk==3.4.0
+nagisa==0.2.7
+jieba==0.42.1
