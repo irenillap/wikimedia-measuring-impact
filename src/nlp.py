@@ -5,6 +5,8 @@ import pandas as pd
 from googletrans import Translator
 
 from nltk.corpus import stopwords
+import nltk
+nltk.download('stopwords')
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from flair.data import Sentence
