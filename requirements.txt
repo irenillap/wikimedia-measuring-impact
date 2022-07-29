@@ -9,6 +9,8 @@ sklearn==0.0
 streamlit==1.8.1
 protobuf~=3.19.0
 wikipedia==1.4.0
-torch==1.7.0+cpu
+torch==1.6.0+cpu
 flair==0.10
 googletrans==3.0.0
+boto3==1.24.40
+nltk==3.4.0
