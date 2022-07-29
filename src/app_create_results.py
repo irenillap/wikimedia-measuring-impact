@@ -5,6 +5,8 @@ import numpy as np
 import urllib.request
 import wikipedia
 from nltk.corpus import stopwords
+import nltk
+nltk.download('stopwords')
 
 import nlp
 import wikidata
