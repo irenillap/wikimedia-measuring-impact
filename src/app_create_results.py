@@ -68,7 +68,7 @@ def benchmark_values(benchmark_data, final_results):
 	return pageviewsperc, pagecompletenessperc
 
 @st.cache(suppress_st_warning=True)
-def calculate_results(images, use_wikimedia, language_process, language_search):
+def calculate_results(images, use_wikimedia, use_ner, language_process, language_search):
 	if use_wikimedia == "Yes":
 		use_wikimedia = True
 	else:
@@ -76,7 +76,7 @@ def calculate_results(images, use_wikimedia, language_process, language_search):
 
 	st.header("Calculating results")
 
-	if language_process in ner_dict.keys():
+	if language_process in ner_dict.keys() and use_ner == 'Yes':
 		ner_filter = True
 		# load tagger
 		from flair.models import SequenceTagger
@@ -196,6 +196,9 @@ st.title("Create Open Access Analysis Data")
 use_wikimedia = st.radio("Is the collection uploaded on Wikimedia?", 
 							("Yes", "No"))
 
+use_ner = st.radio("Use Named Entity Recognition (NER)? Only support for Engligh, French, German and Spanish",
+							("Yes", "No"))
+
 if use_wikimedia == "Yes":
 	collection_id = st.text_input("Input the Wikimedia ID of the collection")
 	limit = st.slider("How many items from the collection do you want to process? (Maximum of 250)", max_value=250, value=100)
@@ -211,7 +214,7 @@ if use_wikimedia == "Yes":
 		confirm_lang = st.button("Confirm language selection")
 
 		if confirm_lang:
-			final_results = calculate_results(images, use_wikimedia, language_process, language_search)	
+			final_results = calculate_results(images, use_wikimedia, use_ner, language_process, language_search)	
 
 			if final_results is not None:
 				# Save results to csv
@@ -248,7 +251,7 @@ elif use_wikimedia == "No":
 		confirm_lang = st.button("Confirm language selection")
 
 		if confirm_lang:
-			final_results = calculate_results(images, use_wikimedia, language_process, language_search)	
+			final_results = calculate_results(images, use_wikimedia, use_ner, language_process, language_search)	
 
 			if final_results is not None:
 				# Save results to csv
