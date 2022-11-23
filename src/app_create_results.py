@@ -196,12 +196,12 @@ st.title("Create Open Access Analysis Data")
 use_wikimedia = st.radio("Is the collection uploaded on Wikimedia?", 
 							("Yes", "No"))
 
-use_ner = st.radio("Use Named Entity Recognition (NER)? Only support for Engligh, French, German and Spanish",
+use_ner = st.radio("Use Named Entity Recognition (NER)? Only support for English, French, German and Spanish. Please note that this will slow calculations down significantly when running locally without a GPU.",
 							("Yes", "No"))
 
 if use_wikimedia == "Yes":
 	collection_id = st.text_input("Input the Wikimedia ID of the collection")
-	limit = st.slider("How many items from the collection do you want to process? (Maximum of 250)", max_value=250, value=100)
+	limit = st.number_input("How many items from the collection do you want to process? (Due to the time it takes to run, we recommend a maximum of 250 but it is possible to run more)", value=100)
 	offset = st.text_input("If you have already processed some collection items, how many have you processed? Introduce 0 if you have processed none. Press Enter to confirm the number")
 	if len(collection_id) > 0 and limit and offset:
 		images = wikidata.images_in_collection(collection_wikipedia_id=collection_id, retrieval_limit=limit, offset=offset)
