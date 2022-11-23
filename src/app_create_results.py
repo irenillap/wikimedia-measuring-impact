@@ -222,7 +222,6 @@ if use_wikimedia == "Yes":
 				st.download_button("Download csv file of results", final_results.to_csv(index=False), file_name, "text/csv")
 
 
-
 elif use_wikimedia == "No":
 
 	st.subheader("Instructions")
